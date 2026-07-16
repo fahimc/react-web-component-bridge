@@ -24,5 +24,6 @@ export type {
   ReactElementPropType,
   ReactElementShadowOptions,
   ReactElementSlotDefinition,
-  ReactElementStyleInput
+  ReactElementStyleInput,
+  ReactElementWrapper
 } from "./types/public";

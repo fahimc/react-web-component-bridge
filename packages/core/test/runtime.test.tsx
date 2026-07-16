@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   configureReactElements,
   createReactElement,
+  defineReactElements,
   defineReactElement,
   getReactElementDefinition,
   isReactElementDefined
@@ -29,6 +30,18 @@ describe("runtime", () => {
     });
     expect(definition.tagName).toBe(tag);
     expect(customElements.get(tag)).toBeUndefined();
+  });
+
+  it("creates SSR-safe definitions when HTMLElement is unavailable", () => {
+    const originalHTMLElement = globalThis.HTMLElement;
+    vi.stubGlobal("HTMLElement", undefined);
+    try {
+      const definition = createReactElement("x-ssr-safe", () => React.createElement("span"), {});
+      expect(definition.metadata.tagName).toBe("x-ssr-safe");
+      expect(() => new definition.elementClass()).not.toThrow();
+    } finally {
+      vi.stubGlobal("HTMLElement", originalHTMLElement);
+    }
   });
 
   it("defines a React-backed custom element and preserves state across prop updates", async () => {
@@ -110,6 +123,41 @@ describe("runtime", () => {
     defineReactElement(tag, () => <span />, {});
     expect(isReactElementDefined(tag)).toBe(true);
     expect(getReactElementDefinition(tag)?.tagName).toBe(tag);
+  });
+
+  it("defines multiple pre-created definitions and skips existing registrations", () => {
+    const first = createReactElement(uniqueTag("x-batch-a"), () => <span>A</span>, {});
+    const second = createReactElement(uniqueTag("x-batch-b"), () => <span>B</span>, {});
+    expect(defineReactElements([first, second])).toEqual([first, second]);
+    expect(defineReactElements([first])).toEqual([first]);
+  });
+
+  it("rejects public methods that conflict with HTMLElement lifecycle names", () => {
+    expect(() =>
+      createReactElement("x-conflict-method", () => <span />, {
+        methods: {
+          connectedCallback: { call: () => undefined }
+        }
+      })
+    ).toThrow("already exists");
+  });
+
+  it("resets form-associated values to configured defaults", () => {
+    const tag = uniqueTag("x-form-reset");
+    defineReactElement(tag, () => <span />, {
+      props: {
+        value: { type: "string", default: "initial" }
+      },
+      form: { valueProp: "value" }
+    });
+    const element = document.createElement(tag) as HTMLElement & {
+      value: string;
+      formResetCallback(): void;
+    };
+    document.body.append(element);
+    element.value = "changed";
+    element.formResetCallback();
+    expect(element.value).toBe("initial");
   });
 
   it("composes global and local wrappers", async () => {
