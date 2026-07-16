@@ -1,13 +1,14 @@
 import React, {
+  configureReactApi,
   createContext,
+  defineComponentTag,
   forwardRef,
   useContext,
   useImperativeHandle,
   useRef,
   useState
-} from "react";
+} from "@fahimc/react-web-component-bridge/react";
 import { createPortal } from "react-dom";
-import { defineReactElement, configureReactElements } from "@fahimc/react-web-component-bridge";
 
 export type Customer = {
   id: string;
@@ -254,15 +255,15 @@ export const DashboardCard = (props: {
   );
 };
 
-export function registerComplexComponents(): void {
-  configureReactElements({
+export function registerExampleWebComponents(): void {
+  configureReactApi({
     wrap: (component, host) => (
       <ThemeContext.Provider value={host.getAttribute("theme") ?? "light"}>
         {component}
       </ThemeContext.Provider>
     )
   });
-  defineReactElement("rwcb-customer-grid", CustomerDataGrid, {
+  defineComponentTag("rwcb-customer-grid", CustomerDataGrid, {
     shadow: { mode: "open" },
     props: {
       rows: { attribute: false, default: [] },
@@ -290,7 +291,7 @@ export function registerComplexComponents(): void {
     styles:
       ":host{display:block}table{width:100%;border-collapse:collapse}td,th{padding:.5rem;border:1px solid #ddd}"
   });
-  defineReactElement("rwcb-customer-picker", CustomerPicker, {
+  defineComponentTag("rwcb-customer-picker", CustomerPicker, {
     shadow: { mode: "open", delegatesFocus: true },
     props: {
       customers: { attribute: false, default: [] },
@@ -320,7 +321,7 @@ export function registerComplexComponents(): void {
     },
     portal: { enabled: true, prop: "portalContainer", target: "shadow" }
   });
-  defineReactElement("rwcb-modal-dialog", ModalDialog, {
+  defineComponentTag("rwcb-modal-dialog", ModalDialog, {
     props: { open: { type: "boolean", reflect: true } },
     events: {
       onCloseRequest: {
@@ -331,7 +332,7 @@ export function registerComplexComponents(): void {
     slots: { title: "title", footer: "footer", children: true },
     portal: { enabled: true, prop: "portalContainer", target: "body" }
   });
-  defineReactElement("rwcb-address-control", AddressFormControl, {
+  defineComponentTag("rwcb-address-control", AddressFormControl, {
     props: {
       value: { type: "json", reflect: true, default: {} },
       required: { type: "boolean", reflect: true },
@@ -351,12 +352,14 @@ export function registerComplexComponents(): void {
       serializeValue: (value) => JSON.stringify(value ?? {})
     }
   });
-  defineReactElement("rwcb-dashboard-card", DashboardCard, {
+  defineComponentTag("rwcb-dashboard-card", DashboardCard, {
     props: { theme: { type: "string", reflect: true } },
     slots: { children: true, header: "header", actions: "actions" },
     styles: ":host{display:block}article{border:1px solid #bbb;padding:1rem;border-radius:8px}"
   });
 }
+
+export const registerComplexComponents = registerExampleWebComponents;
 
 export function sampleCustomers(): Customer[] {
   return Array.from({ length: 1000 }, (_, index) => ({

@@ -7,6 +7,7 @@ test-results/
 tests/package/fixture-app-*/
 *.tgz
 *.tsbuildinfo
+*.log
 .angular/
 .vite/
 .env

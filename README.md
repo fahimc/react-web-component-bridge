@@ -1,6 +1,8 @@
 # React Web Component Bridge
 
-`@fahimc/react-web-component-bridge` exposes existing React components as browser-native Custom Elements. It does not translate React source code into Angular, Vue, or another framework. React remains the runtime renderer and is kept as a peer dependency.
+`@fahimc/react-web-component-bridge` is a React API facade for shipping existing React components as browser-native Web Components. Component authors keep writing normal React components, but import React from the bridge facade. The bridge registers a custom-element tag that can be dropped into Angular, plain HTML, Vue, or any framework that understands Custom Elements.
+
+React is still the renderer under the hood and remains a peer dependency. The package adapts props, attributes, events, slots, form behavior, styles, and lifecycle into a standards-based Web Component boundary.
 
 ## Installation
 
@@ -10,33 +12,116 @@ pnpm add @fahimc/react-web-component-bridge react react-dom
 
 Peer dependencies support React 18 and React 19.
 
-## Five-minute Quick Start
+## Author React Code
+
+Use the bridge React facade instead of importing directly from `react`.
 
 ```tsx
-import { defineReactElement } from "@fahimc/react-web-component-bridge";
+import React, {
+  defineComponentTag,
+  useMemo,
+  useState
+} from "@fahimc/react-web-component-bridge/react";
 
-defineReactElement("acme-customer-picker", CustomerPicker, {
+type CustomerPickerProps = {
+  customers: Array<{ id: string; name: string }>;
+  selectedId?: string;
+  onCustomerSelect?: (customer: { id: string; name: string }) => void;
+};
+
+export function CustomerPicker({ customers, selectedId, onCustomerSelect }: CustomerPickerProps) {
+  const [query, setQuery] = useState("");
+  const matches = useMemo(
+    () => customers.filter((customer) => customer.name.toLowerCase().includes(query.toLowerCase())),
+    [customers, query]
+  );
+
+  return (
+    <section>
+      <input value={query} onChange={(event) => setQuery(event.currentTarget.value)} />
+      {matches.map((customer) => (
+        <button
+          aria-pressed={customer.id === selectedId}
+          key={customer.id}
+          type="button"
+          onClick={() => onCustomerSelect?.(customer)}
+        >
+          {customer.name}
+        </button>
+      ))}
+    </section>
+  );
+}
+
+defineComponentTag("acme-customer-picker", CustomerPicker, {
   shadow: { mode: "open" },
   props: {
     customers: { attribute: false },
-    selectedId: { attribute: "selected-id", type: "string", reflect: true },
-    loading: { type: "boolean", reflect: true, default: false },
-    pageSize: { attribute: "page-size", type: "number", reflect: true, default: 20 }
+    selectedId: { attribute: "selected-id", type: "string", reflect: true }
   },
   events: {
     onCustomerSelect: {
       name: "customer-select",
-      detail: (customer) => customer,
-      bubbles: true,
-      composed: true
+      detail: (customer) => customer
     }
-  },
-  slots: {
-    children: true,
-    emptyState: "empty-state",
-    footer: "footer"
   }
 });
+```
+
+`defineComponentTag` registers the Web Component immediately. `createComponentTag` returns a deferred definition with `.define()` when package authors want to export definitions without side effects.
+
+## Consume From Angular
+
+Import the Web Component bundle once, then use the generated tags in templates. Complex values should be assigned as DOM properties because HTML attributes only carry strings.
+
+```ts
+import "@acme/customer-components/web-components";
+
+@Component({
+  selector: "app-root",
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <acme-customer-picker
+      #picker
+      selected-id="cust-1002"
+      (customer-select)="selectCustomer($event)"
+    ></acme-customer-picker>
+  `
+})
+export class AppComponent implements AfterViewInit {
+  @ViewChild("picker", { static: true }) picker!: ElementRef<
+    HTMLElement & { customers: Customer[] }
+  >;
+
+  customers = sampleCustomers;
+
+  ngAfterViewInit() {
+    this.picker.nativeElement.customers = this.customers;
+  }
+
+  selectCustomer(event: Event) {
+    console.log((event as CustomEvent<Customer>).detail);
+  }
+}
+```
+
+The repo includes `examples/angular-consumer`, which imports `@fahimc/react-web-component-bridge-test-components/web-components` and renders React-authored tags such as `rwcb-customer-grid`, `rwcb-customer-picker`, `rwcb-address-control`, and `rwcb-modal-dialog`.
+
+## Plain HTML
+
+```html
+<script type="module" src="/components/web-components.js"></script>
+
+<acme-customer-picker selected-id="cust-1002"></acme-customer-picker>
+
+<script type="module">
+  const picker = document.querySelector("acme-customer-picker");
+  picker.customers = [{ id: "cust-1002", name: "Ada Lovelace" }];
+  picker.addEventListener("customer-select", (event) => {
+    console.log(event.detail);
+  });
+</script>
 ```
 
 ## Props and Attributes
@@ -60,64 +145,18 @@ events: {
 
 React SyntheticEvents should not cross the custom-element boundary; build event detail from stable data.
 
-## Slots
+## Slots, Styles, Portals, And Forms
 
-Default and named slots are mapped to React props using stable `<slot>` wrappers. React does not own the slotted DOM nodes; consumers own them and the wrapper exposes them to the React component.
-
-## Shadow DOM and Light DOM
-
-`shadow: { mode: "open" }` creates a Shadow Root with a stable React mount part. `shadow: false` renders in light DOM. Styles can be strings, arrays, `CSSStyleSheet` instances, or functions of the host. Constructable stylesheets are used when available, with `<style>` fallback.
-
-## Context Providers
-
-Use `configureReactElements({ wrap })` for global providers and `options.wrap` for local providers. Local wrappers run before global wrappers, so application-level providers can consistently surround component-level providers.
-
-## Portals
-
-`portal.enabled` creates an overlay container and passes it to a prop such as `portalContainer`. Targets can be the Shadow DOM, host, body, a supplied element, or a function. Body-level portals may lose Shadow DOM styling.
-
-## Form-associated Controls
-
-`form` enables `static formAssociated = true` and uses `ElementInternals` when available. The runtime updates form value and standard `input`/`change` events when the configured value prop changes.
-
-## Public Methods
-
-Methods call a forwarded React ref and throw clearly before mount unless `queue: true` is enabled.
-
-## Framework Integration
-
-- Plain HTML: assign complex props imperatively and listen with `addEventListener`.
-- React: use refs for object/array properties and native event listeners for custom events.
-- Angular: use `CUSTOM_ELEMENTS_SCHEMA`, property bindings for primitives, imperative refs for methods, and `ngDefaultControl` or custom value accessors for forms.
-- Vue: bind primitive props normally and use refs for method calls or property-only objects.
-
-## SSR Limitations
-
-Importing the package is SSR-safe. Calling `defineReactElement()` requires `customElements` and must run in a browser.
-
-## Browser Support
-
-Modern evergreen browsers are targeted. Older browsers may need Custom Elements, Shadow DOM, or Constructable Stylesheet polyfills.
-
-## Accessibility Guidance
-
-The bridge preserves React output. Accessibility quality still depends on the React component. Examples include combobox semantics, modal roles, focus handling, form labels, disabled states, and validation messages.
-
-## Performance Guidance
-
-Each element normally owns one React root. Updates are batched in a microtask. Use property-only complex data to avoid serialization costs.
-
-## Troubleshooting
-
-- Invalid custom element names must be kebab-case.
-- React and ReactDOM must resolve from the consuming app.
-- Body portals need global styles.
-- Angular forms may need `ngDefaultControl` or a custom control value accessor.
+Default and named slots are mapped to React props using stable `<slot>` wrappers. Shadow DOM styles can be strings, arrays, `CSSStyleSheet` instances, or functions of the host. Portal containers can target the Shadow DOM, host, body, a supplied element, or a function. Form-associated custom elements use `ElementInternals` when available.
 
 ## API Reference
 
-Exports include `createReactElement`, `defineReactElement`, `defineReactElements`, `configureReactElements`, `isReactElementDefined`, `getReactElementDefinition`, and the public TypeScript types listed in `src/types/public.ts`.
+Primary React facade export: `@fahimc/react-web-component-bridge/react`.
 
-## Contribution and Release
+- React-compatible exports: default `React`, `createElement`, `Fragment`, `StrictMode`, hooks, `memo`, `forwardRef`, `lazy`, common React types, and more.
+- Web Component facade exports: `defineComponentTag`, `createComponentTag`, `defineWebComponent`, `createWebComponent`, and `configureReactApi`.
+- Advanced runtime exports: `createReactElement`, `defineReactElement`, `defineReactElements`, `configureReactElements`, registry helpers, metadata helpers, and public TypeScript types.
+
+## Validation
 
 Run `pnpm validate` before opening a PR. Releases use Changesets. npm publishing is intentionally disabled unless a token exists and publication is explicitly requested.

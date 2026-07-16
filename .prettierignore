@@ -1,2 +1,3 @@
 packages/core/etc/*.api.md
 packages/core/temp/
+pnpm-lock.yaml

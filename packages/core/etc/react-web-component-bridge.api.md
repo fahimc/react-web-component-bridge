@@ -16,7 +16,18 @@ export type CallbackKeys<Props> = {
 }[keyof Props];
 
 // @public (undocumented)
+export type ComponentTagDefinition<Props extends object = Record<string, unknown>, Ref = unknown> = ReactElementDefinition<Props, Ref> & {
+    define(): ReactElementDefinition<Props, Ref>;
+};
+
+// @public (undocumented)
+export function configureReactApi(config: ReactElementGlobalConfig): ReactElementGlobalConfig;
+
+// @public (undocumented)
 export function configureReactElements(config: ReactElementGlobalConfig): ReactElementGlobalConfig;
+
+// @public (undocumented)
+export function createComponentTag<Props extends object, Ref = unknown>(tagName: string, component: ComponentType<Props>, options?: ReactElementOptions<Props, Ref>): ComponentTagDefinition<Props, Ref>;
 
 // @public (undocumented)
 export function createMetadata(tagName: string, options: ReactElementOptions): ReactElementMetadata;
@@ -25,10 +36,19 @@ export function createMetadata(tagName: string, options: ReactElementOptions): R
 export function createReactElement<Props extends object, Ref = unknown>(tagName: string, component: ComponentType<Props>, options?: ReactElementOptions<Props, Ref>): ReactElementDefinition<Props, Ref>;
 
 // @public (undocumented)
+export const createWebComponent: typeof createComponentTag;
+
+// @public (undocumented)
+export function defineComponentTag<Props extends object, Ref = unknown>(tagName: string, component: ComponentType<Props>, options?: ReactElementOptions<Props, Ref>): ComponentTagDefinition<Props, Ref>;
+
+// @public (undocumented)
 export function defineReactElement<Props extends object, Ref = unknown>(tagName: string, component: ComponentType<Props>, options?: ReactElementOptions<Props, Ref>): ReactElementDefinition<Props, Ref>;
 
 // @public (undocumented)
 export function defineReactElements(definitions: readonly ReactElementDefinition[]): ReactElementDefinition[];
+
+// @public (undocumented)
+export const defineWebComponent: typeof defineComponentTag;
 
 // @public (undocumented)
 export function getReactElementDefinition(tagName: string): ReactElementDefinition | undefined;

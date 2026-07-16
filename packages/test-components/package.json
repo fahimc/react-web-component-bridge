@@ -5,13 +5,25 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./web-components": {
+      "types": "./dist/web-components.d.ts",
+      "import": "./dist/web-components.js",
+      "require": "./dist/web-components.cjs"
+    }
+  },
   "dependencies": {
     "@fahimc/react-web-component-bridge": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "scripts": {
-    "build": "tsup src/index.tsx --format esm,cjs --sourcemap --clean && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsup src/index.tsx src/web-components.ts --format esm,cjs --sourcemap --clean && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }

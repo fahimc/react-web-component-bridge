@@ -7,6 +7,13 @@ export {
 export { createReactElement } from "./core/create-react-element";
 export { defineReactElement, defineReactElements } from "./core/define-react-element";
 export { createMetadata } from "./metadata/create-metadata";
+export {
+  configureReactApi,
+  createComponentTag,
+  createWebComponent,
+  defineComponentTag,
+  defineWebComponent
+} from "./react";
 export type {
   CallbackArgs,
   CallbackKeys,
@@ -27,3 +34,4 @@ export type {
   ReactElementStyleInput,
   ReactElementWrapper
 } from "./types/public";
+export type { ComponentTagDefinition } from "./react";

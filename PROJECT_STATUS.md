@@ -2,14 +2,16 @@
 
 ## Current phase
 
-Phase 10: release hardening complete pending external credentials.
+Phase 11: React facade rebuild complete pending external publication credentials.
 
 ## Completed tasks
 
 - Workspace, TypeScript, lint, formatting, build, test, Playwright, and CI scaffolding.
 - Core package API and controller-based runtime.
+- React-compatible facade API that re-exports React authoring primitives and adds `defineComponentTag` / `createComponentTag`.
 - Generator package and metadata output.
-- Complex component examples and framework consumer examples.
+- Complex React component examples, side-effect Web Component registration bundle, and framework consumer examples.
+- Angular example rebuilt to import the Web Component bundle and render React-authored components with custom-element tags.
 - Documentation, ADRs, changelog, performance benchmark, and validation status.
 - Coverage thresholds met locally.
 
@@ -21,7 +23,9 @@ Phase 10: release hardening complete pending external credentials.
 
 ## Test status
 
-Passing locally: format, lint, TypeScript build mode, unit tests, coverage, public API type tests, package build, example builds, Angular build, bundle-size check, package pack, clean fixture install/import, benchmark, and Playwright Chromium/Firefox/WebKit browser smoke.
+Last full baseline passed locally before the facade rebuild: format, lint, TypeScript build mode, unit tests, coverage, public API type tests, package build, example builds, Angular build, bundle-size check, package pack, clean fixture install/import, benchmark, and Playwright Chromium/Firefox/WebKit browser smoke.
+
+Current facade rebuild checks completed: format, lint, TypeScript typecheck, coverage tests, package build, example builds, public API type tests, size-limit, API report, package pack, and Playwright Chromium/Firefox/WebKit browser smoke.
 
 External blocker: remote GitHub workflow files require a token with `workflow` scope.
 
@@ -41,9 +45,11 @@ Current measured baseline: 95.71% statements, 85.04% branches, 100% functions, 9
 
 - React and ReactDOM are peer dependencies.
 - The package wraps React at runtime and does not translate source code.
+- The recommended authoring import is `@fahimc/react-web-component-bridge/react`, so users keep React component code intact while the bridge adapts the exported component to a Web Component tag.
 - Metadata is generated from explicit definitions, not arbitrary source analysis.
 
 ## Next actions
 
+- Host the Angular example through a Cloudflare Tunnel for review.
 - Refresh GitHub auth with `gh auth refresh -h github.com -s workflow` and push `.github/workflows`.
 - Prepare a Changesets version when npm publication is explicitly requested.

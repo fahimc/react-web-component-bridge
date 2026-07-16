@@ -15,6 +15,15 @@
             "index": "src/index.html",
             "outputPath": "dist/angular-consumer"
           }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "angular-consumer:build",
+            "host": "127.0.0.1",
+            "port": 4200,
+            "allowedHosts": true
+          }
         }
       }
     }
