@@ -22,10 +22,12 @@
     "bench": "tsx tests/performance/benchmark.ts",
     "build": "pnpm --filter @fahimc/react-web-component-bridge build && pnpm --filter @fahimc/react-web-component-bridge-generator build && pnpm --filter @fahimc/react-web-component-bridge-test-components build",
     "build:examples": "pnpm --filter plain-html-consumer build && pnpm --filter react-consumer build && pnpm --filter vue-consumer build && pnpm --filter complex-components-example build && pnpm --filter angular-consumer build",
+    "build:site": "pnpm --filter rwcb-site build",
+    "dev:site": "pnpm --filter rwcb-site dev",
     "size": "size-limit",
     "api": "api-extractor run --local --verbose --config packages/core/api-extractor.json",
     "pack:core": "pnpm --dir packages/core pack --pack-destination ../../dist",
-    "validate": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build:examples && pnpm test:types",
+    "validate": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm build:examples && pnpm build:site && pnpm test:types",
     "prepare-release": "changeset version"
   },
   "devDependencies": {

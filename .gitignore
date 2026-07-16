@@ -10,5 +10,6 @@ tests/package/fixture-app-*/
 *.log
 .angular/
 .vite/
+.netlify/
 .env
 .DS_Store

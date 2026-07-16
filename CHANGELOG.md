@@ -4,6 +4,7 @@
 
 ### Added
 
+- Added a Netlify-ready documentation website in `site/` with a generated hero asset, live React-to-Web-Component preview editor, module documentation, supported API matrix, unsupported behavior notes, and architecture workflow page sections.
 - Added the React-compatible facade export `@fahimc/react-web-component-bridge/react`, allowing component authors to keep React code intact while registering Web Component tags with `defineComponentTag`, `createComponentTag`, `defineWebComponent`, or `createWebComponent`.
 - Added a side-effect Web Component bundle for the example React components at `@fahimc/react-web-component-bridge-test-components/web-components`.
 - Rebuilt the Angular example so it imports the Web Component bundle and renders the React-authored components as custom-element tags.
@@ -19,6 +20,7 @@
 ### Changed
 
 - Made the facade import the recommended authoring API while keeping the lower-level bridge runtime available for advanced and generated integrations.
+- Added `build:site`, `dev:site`, and Netlify configuration for deploying the website from this repository.
 
 ### Validation
 

@@ -1,0 +1,12 @@
+[build]
+  command = "pnpm build && pnpm build:site"
+  publish = "site/dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+  PNPM_VERSION = "10.8.0"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -12,6 +12,7 @@ Phase 11: React facade rebuild complete pending external publication credentials
 - Generator package and metadata output.
 - Complex React component examples, side-effect Web Component registration bundle, and framework consumer examples.
 - Angular example rebuilt to import the Web Component bundle and render React-authored components with custom-element tags.
+- Netlify-ready documentation website with live React-to-Web-Component preview editor, API support matrix, unsupported behavior notes, and architecture workflow sections.
 - Documentation, ADRs, changelog, performance benchmark, and validation status.
 - Coverage thresholds met locally.
 
@@ -25,7 +26,7 @@ Phase 11: React facade rebuild complete pending external publication credentials
 
 Last full baseline passed locally before the facade rebuild: format, lint, TypeScript build mode, unit tests, coverage, public API type tests, package build, example builds, Angular build, bundle-size check, package pack, clean fixture install/import, benchmark, and Playwright Chromium/Firefox/WebKit browser smoke.
 
-Current facade rebuild checks completed: format, lint, TypeScript typecheck, coverage tests, package build, example builds, public API type tests, size-limit, API report, package pack, and Playwright Chromium/Firefox/WebKit browser smoke.
+Current facade rebuild checks completed: format, lint, TypeScript typecheck, coverage tests, package build, example builds, site build, public API type tests, size-limit, API report, package pack, and Playwright Chromium/Firefox/WebKit browser smoke.
 
 External blocker: remote GitHub workflow files require a token with `workflow` scope.
 
@@ -51,5 +52,6 @@ Current measured baseline: 95.71% statements, 85.04% branches, 100% functions, 9
 ## Next actions
 
 - Host the Angular example through a Cloudflare Tunnel for review.
+- Deploy the documentation website to Netlify.
 - Refresh GitHub auth with `gh auth refresh -h github.com -s workflow` and push `.github/workflows`.
 - Prepare a Changesets version when npm publication is explicitly requested.

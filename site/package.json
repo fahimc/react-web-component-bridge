@@ -1,0 +1,19 @@
+{
+  "name": "rwcb-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5174",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4174"
+  },
+  "dependencies": {
+    "@fahimc/react-web-component-bridge": "workspace:*",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^6.0.3",
+    "vite": "^7.0.5"
+  }
+}

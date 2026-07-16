@@ -160,3 +160,15 @@ Primary React facade export: `@fahimc/react-web-component-bridge/react`.
 ## Validation
 
 Run `pnpm validate` before opening a PR. Releases use Changesets. npm publishing is intentionally disabled unless a token exists and publication is explicitly requested.
+
+## Website
+
+The repository includes a Netlify-ready documentation and preview site in `site/`.
+
+```bash
+pnpm build
+pnpm build:site
+pnpm --filter rwcb-site preview
+```
+
+The site documents the module, supported React facade APIs, unsupported behaviors, Angular and HTML consumption, and the runtime architecture. It also includes a live editor that updates a React-authored Web Component preview and generated bridge, HTML, and Angular snippets.
