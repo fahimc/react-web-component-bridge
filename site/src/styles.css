@@ -26,6 +26,10 @@ body {
   min-width: 320px;
 }
 
+main {
+  overflow-x: clip;
+}
+
 button,
 input,
 select,
@@ -101,6 +105,7 @@ textarea {
 }
 
 .hero-copy {
+  min-width: 0;
   max-width: 780px;
 }
 
@@ -399,6 +404,7 @@ pre {
 
 .doc-grid article,
 .support-layout > div {
+  min-width: 0;
   border: 1px solid #d9e0e7;
   border-radius: 8px;
   background: #ffffff;
@@ -471,6 +477,10 @@ pre {
   grid-template-columns: minmax(340px, 0.9fr) minmax(340px, 1.1fr);
   gap: 24px;
   align-items: start;
+}
+
+.architecture-layout > * {
+  min-width: 0;
 }
 
 .workflow-list {
@@ -587,13 +597,43 @@ pre {
   }
 
   h1 {
-    font-size: 38px;
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  .lede {
+    font-size: 17px;
+  }
+
+  .hero-copy,
+  .hero-media,
+  .section-heading,
+  .doc-grid article,
+  .support-layout > div {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-actions .button {
+    flex: 1 1 150px;
   }
 
   .hero-facts {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    width: 100%;
+    max-width: 100%;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(168px, 1fr);
+    grid-template-columns: none;
     overflow-x: auto;
     padding-bottom: 4px;
+    overscroll-behavior-inline: contain;
+  }
+
+  .doc-grid,
+  .support-layout,
+  .architecture-layout {
+    width: 100%;
+    max-width: 100%;
   }
 
   .hero-media img {
