@@ -1,0 +1,17 @@
+{
+  "name": "@fahimc/react-web-component-bridge-test-components",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@fahimc/react-web-component-bridge": "workspace:*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm,cjs --sourcemap --clean && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

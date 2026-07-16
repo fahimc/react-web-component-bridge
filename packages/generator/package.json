@@ -1,0 +1,27 @@
+{
+  "name": "@fahimc/react-web-component-bridge-generator",
+  "version": "0.1.0",
+  "description": "Metadata generator for @fahimc/react-web-component-bridge definitions.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "react-web-component-bridge": "./dist/cli.cjs"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "dependencies": {
+    "@fahimc/react-web-component-bridge": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli.ts --format esm,cjs --sourcemap --clean && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

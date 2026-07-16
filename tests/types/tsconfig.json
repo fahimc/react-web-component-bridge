@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["react"],
+    "baseUrl": "../..",
+    "paths": {
+      "@fahimc/react-web-component-bridge": ["packages/core/src/index.ts"]
+    }
+  },
+  "include": ["./public-api.test-d.ts"]
+}

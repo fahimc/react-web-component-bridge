@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+tests/package/fixture-app-*/
+*.tgz
+*.tsbuildinfo
+.angular/
+.vite/
+.env
+.DS_Store

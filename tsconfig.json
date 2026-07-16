@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/generator" },
+    { "path": "./packages/test-components" },
+    { "path": "./examples/plain-html" },
+    { "path": "./examples/react-consumer" },
+    { "path": "./examples/vue-consumer" },
+    { "path": "./examples/complex-components" }
+  ]
+}

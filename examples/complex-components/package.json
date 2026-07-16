@@ -1,0 +1,17 @@
+{
+  "name": "complex-components-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@fahimc/react-web-component-bridge-test-components": "workspace:*",
+    "vite": "^7.0.5",
+    "typescript": "^6.0.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}

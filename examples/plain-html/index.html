@@ -1,0 +1,19 @@
+<main>
+  <rwcb-customer-grid page-size="5">
+    <strong slot="toolbar">Plain HTML toolbar slot</strong>
+    <span slot="empty-state">No customers</span>
+    <span slot="footer">Footer slot content</span>
+  </rwcb-customer-grid>
+  <form id="customer-form">
+    <rwcb-customer-picker name="customerId" required>
+      <span slot="empty-state">Nothing found</span>
+    </rwcb-customer-picker>
+    <button type="submit">Submit</button>
+  </form>
+  <rwcb-dashboard-card theme="contrast">
+    <span slot="header">Revenue</span>
+    <strong>$42,000</strong>
+    <button slot="actions">Refresh</button>
+  </rwcb-dashboard-card>
+  <script type="module" src="/src/main.ts"></script>
+</main>
