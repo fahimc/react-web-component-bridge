@@ -70,6 +70,25 @@ defineComponentTag("acme-customer-picker", CustomerPicker, {
 
 `defineComponentTag` registers the Web Component immediately. `createComponentTag` returns a deferred definition with `.define()` when package authors want to export definitions without side effects.
 
+## Replace Existing React Imports
+
+The generator package includes a folder-level import rewrite command for moving existing component source onto the bridge facade.
+
+```bash
+pnpm --filter @fahimc/react-web-component-bridge-generator build
+react-web-component-bridge replace-react-imports --dir src/components --dry-run
+react-web-component-bridge replace-react-imports --dir src/components
+```
+
+It rewrites exact `react` module specifiers in `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.mts`, `.cjs`, and `.cts` files:
+
+```diff
+- import React, { useState } from "react";
++ import React, { useState } from "@fahimc/react-web-component-bridge/react";
+```
+
+It intentionally leaves `react-dom`, `react-dom/client`, and `react/jsx-runtime` alone.
+
 ## Consume From Angular
 
 Import the Web Component bundle once, then use the generated tags in templates. Complex values should be assigned as DOM properties because HTML attributes only carry strings.

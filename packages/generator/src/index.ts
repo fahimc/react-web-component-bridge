@@ -1,10 +1,56 @@
+import { readdir, readFile, writeFile } from "node:fs/promises";
+import { extname, join, resolve } from "node:path";
 import type { ReactElementMetadata } from "@fahimc/react-web-component-bridge";
+
+export const BRIDGE_REACT_IMPORT = "@fahimc/react-web-component-bridge/react";
 
 export type GeneratorOutput = {
   customElementsJson: string;
   declarations: string;
   markdown: string;
 };
+
+export type RewriteReactImportsOptions = {
+  rootDir: string;
+  replacement?: string;
+  dryRun?: boolean;
+  extensions?: readonly string[];
+  excludeDirectories?: readonly string[];
+};
+
+export type RewriteReactImportsFileResult = {
+  path: string;
+  replacements: number;
+};
+
+export type RewriteReactImportsResult = {
+  rootDir: string;
+  replacement: string;
+  dryRun: boolean;
+  scannedFiles: number;
+  changedFiles: RewriteReactImportsFileResult[];
+};
+
+export type RewriteReactImportsTextResult = {
+  code: string;
+  replacements: number;
+};
+
+const defaultExtensions = new Set([".js", ".jsx", ".ts", ".tsx", ".mjs", ".mts", ".cjs", ".cts"]);
+const defaultExcludedDirectories = new Set([
+  ".angular",
+  ".git",
+  ".next",
+  ".turbo",
+  ".vite",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "out",
+  "playwright-report",
+  "test-results"
+]);
 
 export function generateArtifacts(metadata: readonly ReactElementMetadata[]): GeneratorOutput {
   return {
@@ -40,6 +86,61 @@ export function generateArtifacts(metadata: readonly ReactElementMetadata[]): Ge
     declarations: createDeclarations(metadata),
     markdown: createMarkdown(metadata)
   };
+}
+
+export async function rewriteReactImportsInFolder(
+  options: RewriteReactImportsOptions
+): Promise<RewriteReactImportsResult> {
+  const rootDir = resolve(options.rootDir);
+  const replacement = options.replacement ?? BRIDGE_REACT_IMPORT;
+  const dryRun = options.dryRun ?? false;
+  const extensions = new Set(options.extensions?.map(normalizeExtension) ?? defaultExtensions);
+  const excludedDirectories = new Set([
+    ...defaultExcludedDirectories,
+    ...(options.excludeDirectories ?? [])
+  ]);
+  const changedFiles: RewriteReactImportsFileResult[] = [];
+  let scannedFiles = 0;
+
+  for await (const filePath of walkFiles(rootDir, extensions, excludedDirectories)) {
+    scannedFiles += 1;
+    const source = await readFile(filePath, "utf8");
+    const result = rewriteReactImportsInText(source, replacement);
+    if (result.replacements === 0) {
+      continue;
+    }
+
+    changedFiles.push({ path: filePath, replacements: result.replacements });
+    if (!dryRun) {
+      await writeFile(filePath, result.code);
+    }
+  }
+
+  return {
+    rootDir,
+    replacement,
+    dryRun,
+    scannedFiles,
+    changedFiles
+  };
+}
+
+export function rewriteReactImportsInText(
+  source: string,
+  replacement = BRIDGE_REACT_IMPORT
+): RewriteReactImportsTextResult {
+  let replacements = 0;
+  let code = source;
+  const rewrite = (match: string, prefix: string, quote: string) => {
+    replacements += 1;
+    return `${prefix}${quote}${replacement}${quote}`;
+  };
+
+  code = code.replace(/\b(from\s*)(["'])react\2/g, rewrite);
+  code = code.replace(/\b(import\s*)(["'])react\2/g, rewrite);
+  code = code.replace(/\b(import\s*\(\s*)(["'])react\2/g, rewrite);
+
+  return { code, replacements };
 }
 
 function createDeclarations(metadata: readonly ReactElementMetadata[]): string {
@@ -84,6 +185,32 @@ function createMarkdown(metadata: readonly ReactElementMetadata[]): string {
       ].join("\n")
     )
     .join("\n\n");
+}
+
+async function* walkFiles(
+  directory: string,
+  extensions: ReadonlySet<string>,
+  excludedDirectories: ReadonlySet<string>
+): AsyncGenerator<string> {
+  const entries = await readdir(directory, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (!excludedDirectories.has(entry.name)) {
+        yield* walkFiles(entryPath, extensions, excludedDirectories);
+      }
+      continue;
+    }
+
+    if (entry.isFile() && extensions.has(extname(entry.name))) {
+      yield entryPath;
+    }
+  }
+}
+
+function normalizeExtension(extension: string): string {
+  return extension.startsWith(".") ? extension : `.${extension}`;
 }
 
 function pascal(value: string): string {

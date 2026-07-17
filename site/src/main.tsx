@@ -80,6 +80,79 @@ const workflowSteps = [
   "Consumer frameworks handle the result as a platform custom element, not as a React subtree."
 ];
 
+const architectureLayers = [
+  { label: "React source", detail: "Component code imports React APIs from the bridge facade." },
+  { label: "Facade layer", detail: "React exports pass through; tag helpers create definitions." },
+  {
+    label: "Definition model",
+    detail: "Props, attributes, events, slots, methods, styles, forms, portals."
+  },
+  {
+    label: "CustomElement class",
+    detail: "Browser lifecycle owns connect, disconnect, and attributes."
+  },
+  { label: "Controller stack", detail: "Each boundary concern is isolated and tested separately." },
+  { label: "React root", detail: "React renders the original component into the element mount." },
+  { label: "Platform tag", detail: "Angular, HTML, Vue, or CMS pages consume the browser element." }
+];
+
+const controllerLayers = [
+  "PropertyController: parse, validate, transform, reflect, schedule",
+  "RenderController: microtask batching, wrappers, React root render",
+  "EventController: callback prop to CustomEvent dispatcher",
+  "SlotController: default and named slots as React props",
+  "StyleController: adoptedStyleSheets with style fallback",
+  "PortalController: shadow, host, body, element, or function target",
+  "FormController: ElementInternals value and validity",
+  "MethodController: host methods forwarded to React refs"
+];
+
+const apiTranslations = [
+  {
+    api: "React default, createElement, Fragment, StrictMode, Suspense",
+    translation: "Pass-through facade exports.",
+    boundary: "No source rewrite at runtime. React still renders internally."
+  },
+  {
+    api: "Hooks: useState, useEffect, useMemo, useRef, useId, useTransition",
+    translation: "Pass-through facade exports with unchanged hook semantics.",
+    boundary: "Hook state stays inside the React root; hosts see DOM, props, methods, and events."
+  },
+  {
+    api: "memo, forwardRef, lazy, createContext",
+    translation: "Pass-through exports.",
+    boundary:
+      "forwardRef can back public methods; context remains internal to wrapper/provider chains."
+  },
+  {
+    api: "Component props",
+    translation: "Property controller maps host properties and attributes to React props.",
+    boundary:
+      "Primitives can reflect to attributes; objects, arrays, functions, and nodes stay property-only."
+  },
+  {
+    api: "Callback props",
+    translation: "Event controller injects callbacks into React.",
+    boundary: "Calling the callback dispatches a browser CustomEvent with configured detail."
+  },
+  {
+    api: "children and named content",
+    translation: "Slot controller supplies stable slot wrappers as React props.",
+    boundary: "The consumer owns slotted DOM; React does not clone or reconcile those nodes."
+  },
+  {
+    api: "Refs and imperative methods",
+    translation: "Method controller calls a forwarded React ref.",
+    boundary: "Consumers call methods on the custom element instance."
+  },
+  {
+    api: "Portals and forms",
+    translation: "Portal and form controllers provide targets and ElementInternals integration.",
+    boundary:
+      "Overlays and form values become platform behavior while React remains the UI renderer."
+  }
+];
+
 function buildReactSource(heading: string, accent: string, metric: number, compact: boolean) {
   return `import React, { defineComponentTag, useMemo } from "@fahimc/react-web-component-bridge/react";
 
@@ -420,6 +493,17 @@ defineComponentTag("acme-customer-card", CustomerCard, {
               where configured.
             </p>
           </article>
+          <article>
+            <h3>Import replacement</h3>
+            <p>
+              Run the generator CLI against a folder to rewrite exact <code>react</code> imports to
+              the bridge facade. Use <code>--dry-run</code> first to review changed files.
+            </p>
+            <pre>
+              <code>{`react-web-component-bridge replace-react-imports --dir src/components --dry-run
+react-web-component-bridge replace-react-imports --dir src/components`}</code>
+            </pre>
+          </article>
         </div>
       </section>
 
@@ -478,6 +562,52 @@ defineComponentTag("acme-customer-card", CustomerCard, {
             <div>Angular or HTML tag</div>
           </div>
         </div>
+
+        <div className="architecture-diagrams" aria-label="Detailed architecture diagrams">
+          <section className="diagram-panel">
+            <h3>Runtime pipeline</h3>
+            <div className="pipeline-diagram">
+              {architectureLayers.map((layer, index) => (
+                <React.Fragment key={layer.label}>
+                  <div>
+                    <strong>{layer.label}</strong>
+                    <span>{layer.detail}</span>
+                  </div>
+                  {index < architectureLayers.length - 1 ? <b>down</b> : null}
+                </React.Fragment>
+              ))}
+            </div>
+          </section>
+
+          <section className="diagram-panel">
+            <h3>Controller stack</h3>
+            <ul className="controller-stack">
+              {controllerLayers.map((layer) => (
+                <li key={layer}>{layer}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <section className="translation-matrix" aria-label="React API translation matrix">
+          <div>
+            <p className="eyebrow">React API translation</p>
+            <h3>What is passed through, what is adapted, and what crosses the browser boundary.</h3>
+          </div>
+          <div className="translation-table">
+            {apiTranslations.map((row) => (
+              <article key={row.api}>
+                <h4>{row.api}</h4>
+                <p>
+                  <strong>Bridge behavior:</strong> {row.translation}
+                </p>
+                <p>
+                  <strong>Boundary result:</strong> {row.boundary}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
       </section>
 
       <section className="band install-band">
