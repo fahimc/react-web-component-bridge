@@ -103,7 +103,7 @@ react-web-component-bridge replace-react-imports --dir src/components
 + import React, { useState } from "@fahimc/react-web-component-bridge/react";
 ```
 
-The command intentionally leaves `react-dom`, `react-dom/client`, and `react/jsx-runtime` alone so unsupported runtime assumptions stay visible.
+The command intentionally leaves `react-dom`, `react-dom/client`, and `react/jsx-runtime` alone so compiler migration can review those call sites explicitly.
 
 ## Consume From Angular
 
@@ -144,9 +144,18 @@ Supported in the no-React compiler path:
 - TSX elements and fragments,
 - function components,
 - `useState`,
+- `useReducer`,
 - `useMemo`,
 - `useRef`,
-- identity `useCallback` and `memo`,
+- `useEffect`, `useLayoutEffect`, and `useInsertionEffect`,
+- `useCallback`, `memo`, `useDeferredValue`, `useTransition`, and `startTransition`,
+- `useSyncExternalStore`,
+- `createContext` and `useContext`,
+- `forwardRef` and `useImperativeHandle`,
+- `createPortal`,
+- `lazy` and `Suspense` fallback rendering,
+- `createElement`, `cloneElement`, `isValidElement`, `Children`, and `createRef`,
+- `useId` and `useDebugValue`,
 - props and primitive attributes,
 - property-only arrays/objects,
 - named/default slots,
@@ -154,18 +163,15 @@ Supported in the no-React compiler path:
 - public custom-element methods,
 - static style metadata.
 
-Not supported yet:
+Compatibility notes:
 
-- React context,
-- portals,
-- `forwardRef` / `useImperativeHandle`,
-- effects with React timing semantics,
-- Suspense, lazy loading, transitions, concurrent rendering,
-- React SyntheticEvent transport,
-- CSS-in-JS runtime extraction,
-- full React reconciliation.
+- Effects run from the compiled custom-element lifecycle, not React's scheduler.
+- Transitions are synchronous browser-runtime shims.
+- Lazy components resolve through promises and rerender the owning custom element.
+- The first renderer uses replace-rendering rather than React's reconciler.
+- CSS-in-JS runtime extraction and React SyntheticEvent transport are intentionally outside the Web Component contract.
 
-Unsupported React APIs should be documented or diagnosed by the compiler. They must not silently pull React into the production bundle.
+These APIs must never silently pull React into the production bundle.
 
 ## Legacy Runtime Bridge
 

@@ -32,9 +32,18 @@ const supportedApis = [
   "TSX elements and fragments",
   "Function components",
   "useState",
+  "useReducer",
   "useMemo",
   "useRef",
-  "identity useCallback and memo",
+  "useEffect and useLayoutEffect",
+  "useCallback and memo",
+  "createContext and useContext",
+  "forwardRef and useImperativeHandle",
+  "createPortal",
+  "lazy and Suspense fallbacks",
+  "useTransition and useDeferredValue",
+  "useSyncExternalStore",
+  "Children, cloneElement, isValidElement",
   "props and primitive attributes",
   "property-only arrays and objects",
   "slots",
@@ -43,14 +52,14 @@ const supportedApis = [
   "static styles"
 ];
 
-const unsupportedItems = [
-  "React context and providers",
-  "createPortal, Suspense, lazy, transitions, and concurrent rendering",
-  "forwardRef and useImperativeHandle in compiled output",
-  "React effect timing semantics",
-  "React SyntheticEvent transport",
+const compatibilityItems = [
+  "Effects run from the custom-element lifecycle",
+  "Transitions are synchronous browser-runtime shims",
+  "Lazy components resolve promises and rerender the owning element",
+  "The first renderer uses replace-rendering rather than React reconciliation",
+  "CustomEvents carry stable detail data instead of React SyntheticEvents",
   "CSS-in-JS runtime extraction",
-  "full React reconciliation or hydration"
+  "React hydration is not used because output is browser Custom Elements"
 ];
 
 const workflowSteps = [
@@ -104,13 +113,14 @@ const apiTranslations = [
   },
   {
     api: "Hooks: useState, useMemo, useRef",
-    translation: "Compiled to per-element hook cells.",
+    translation:
+      "Compiled to per-element hook cells. useReducer, effects, IDs, and refs use the same hook table.",
     boundary: "State lives on the custom element instance, not in React."
   },
   {
-    api: "memo and useCallback",
-    translation: "Identity helpers in the compiler runtime.",
-    boundary: "They preserve source shape without shipping React memoization."
+    api: "Context, forwardRef, imperative handles",
+    translation: "Compiled to provider stacks and public handle objects.",
+    boundary: "Custom-element methods can call the compiled handle without React refs."
   },
   {
     api: "Component props",
@@ -134,9 +144,10 @@ const apiTranslations = [
     boundary: "Consumers call methods on the custom element instance."
   },
   {
-    api: "Context, portals, Suspense, lazy",
-    translation: "Reported as unsupported in the no-React compiler path.",
-    boundary: "Unsupported APIs must not silently bundle React."
+    api: "Portals, Suspense, lazy, transitions",
+    translation:
+      "Compiled to DOM portal containers, fallback boundaries, async rerenders, and sync transition shims.",
+    boundary: "No ReactDOM portal, scheduler, or lazy runtime is bundled."
   }
 ];
 
@@ -515,9 +526,9 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
           <p className="eyebrow">Supported compiler subset</p>
           <h2>React-shaped authoring without React in production.</h2>
           <p>
-            The compiler supports a practical subset of component TSX and fails visibly for React
-            APIs that would otherwise require the real React runtime. Unsupported APIs are roadmap
-            items, not hidden bundle dependencies.
+            The compiler supports the previously unsupported React authoring APIs through a
+            standalone browser runtime. Compatibility differences are documented here and must not
+            become hidden React bundle dependencies.
           </p>
         </div>
         <div className="support-layout">
@@ -530,9 +541,9 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
             </ul>
           </div>
           <div>
-            <h3>Not supported</h3>
+            <h3>Compatibility notes</h3>
             <ul className="plain-list">
-              {unsupportedItems.map((item) => (
+              {compatibilityItems.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>

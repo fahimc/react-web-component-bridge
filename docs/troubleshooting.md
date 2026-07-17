@@ -10,16 +10,17 @@ rg -n 'react-dom|createRoot|ReactDOM|from "react"|from '\''react'\''' dist
 
 If it matches, check that Angular imports the compiler output, not the legacy React-backed runtime package.
 
-## The compiler reports an unsupported React API
+## A React-shaped API behaves differently from React
 
-The no-React compiler does not silently include React to preserve unsupported behavior. Replace the API with an explicit custom-element contract or keep that component on the legacy runtime path.
+The compiler implements React-shaped APIs on top of Custom Elements and the browser DOM. It does not import React to preserve exact scheduler or reconciler behavior.
 
-Common replacements:
+Common differences:
 
-- context -> explicit props or host attributes,
-- `forwardRef` / `useImperativeHandle` -> `methods` metadata,
-- portals -> host-managed overlay outlet,
-- effects -> custom-element lifecycle or host events.
+- effects run from custom-element lifecycle queues,
+- transitions are synchronous compatibility shims,
+- lazy components rerender the owning custom element after resolution,
+- portals render into browser DOM containers without ReactDOM,
+- public imperative APIs should still be exposed with `methods` metadata for Angular/HTML hosts.
 
 ## Object props are strings
 

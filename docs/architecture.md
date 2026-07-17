@@ -89,23 +89,27 @@ react-web-component-bridge replace-react-imports --dir src/components
 
 ## React API Translation
 
-| React-shaped API                                  | Compiler behavior                                                                          | Production result                                            |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| `React` default import                            | Removed when it is only needed for TSX/types.                                              | No React object in the bundle.                               |
-| TSX elements                                      | Lowered to `h(type, props, ...children)` and rendered by the generated DOM runtime.        | Real DOM nodes inside the custom element.                    |
-| `Fragment` / `<>...</>`                           | Lowered to a compiler fragment token.                                                      | `DocumentFragment` content.                                  |
-| `useState`                                        | Replaced by per-element hook cells and a queued custom-element rerender.                   | State lives on the element instance, not in React.           |
-| `useMemo`                                         | Replaced by dependency-array memo cells.                                                   | Memoized values live on the element instance.                |
-| `useRef`                                          | Replaced by `{ current }` cells; JSX `ref` assigns DOM elements.                           | DOM refs without React.                                      |
-| `useCallback`, `memo`                             | Currently identity helpers.                                                                | No React memo scheduler.                                     |
-| `useEffect`, `useLayoutEffect`                    | Currently no-ops in the compiler runtime.                                                  | Side effects should move to DOM events or element lifecycle. |
-| Component props                                   | `defineComponentTag` metadata creates DOM property accessors and observed attributes.      | Angular assigns properties; attributes stay primitive.       |
-| Callback props such as `onCustomerSelect`         | Compiler injects functions from `events` metadata.                                         | Calling the prop dispatches `CustomEvent`.                   |
-| `children` and named content                      | `slots` metadata creates `<slot>` nodes passed as props.                                   | Host-owned light DOM is projected through slots.             |
-| Public methods                                    | `methods` metadata defines methods on the custom element prototype.                        | Angular/HTML calls methods on the element instance.          |
-| Styles                                            | `styles` metadata injects style text into the shadow/light root.                           | No CSS-in-JS runtime required.                               |
-| `createContext`, `useContext`, `forwardRef`, etc. | Reported as unsupported by the no-React compiler until native equivalents are implemented. | Build-time diagnostic, not hidden React bundling.            |
-| `createPortal`, `Suspense`, `lazy`                | Reported as unsupported.                                                                   | Build-time diagnostic, not hidden React bundling.            |
+| React-shaped API                                       | Compiler behavior                                                                     | Production result                                          |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `React` default import                                 | Removed when it is only needed for TSX/types.                                         | No React object in the bundle.                             |
+| TSX elements                                           | Lowered to `h(type, props, ...children)` and rendered by the generated DOM runtime.   | Real DOM nodes inside the custom element.                  |
+| `Fragment` / `<>...</>`                                | Lowered to a compiler fragment token.                                                 | `DocumentFragment` content.                                |
+| `useState`, `useReducer`                               | Replaced by per-element hook cells and a queued custom-element rerender.              | State lives on the element instance, not in React.         |
+| `useMemo`, `useCallback`                               | Replaced by dependency-array memo cells.                                              | Memoized values live on the element instance.              |
+| `useRef`, `createRef`                                  | Replaced by `{ current }` cells; JSX `ref` assigns DOM elements.                      | DOM refs without React.                                    |
+| `memo`                                                 | Identity wrapper for compiler output.                                                 | No React memo scheduler is shipped.                        |
+| `useEffect`, `useLayoutEffect`, `useInsertionEffect`   | Registered against the compiled custom-element lifecycle.                             | Cleanup runs on dependency changes and element disconnect. |
+| `createContext`, `useContext`                          | Compiled to provider stack values during vnode rendering.                             | Context is internal to the compiled element render tree.   |
+| `forwardRef`, `useImperativeHandle`                    | Compiled to a public handle object that method metadata can call.                     | Hosts call methods on the custom element instance.         |
+| `createPortal`                                         | Compiled to browser DOM portal containers in the target element.                      | Portal content renders without ReactDOM.                   |
+| `lazy`, `Suspense`                                     | Lazy promises schedule custom-element rerenders; Suspense supplies fallback content.  | Async component loading without React.                     |
+| `useTransition`, `startTransition`, `useDeferredValue` | Synchronous browser-runtime compatibility shims.                                      | No concurrent React scheduler is shipped.                  |
+| `Children`, `cloneElement`, `isValidElement`           | Implemented over compiler vnode objects.                                              | Source helpers work without React objects.                 |
+| Component props                                        | `defineComponentTag` metadata creates DOM property accessors and observed attributes. | Angular assigns properties; attributes stay primitive.     |
+| Callback props such as `onCustomerSelect`              | Compiler injects functions from `events` metadata.                                    | Calling the prop dispatches `CustomEvent`.                 |
+| `children` and named content                           | `slots` metadata creates `<slot>` nodes passed as props.                              | Host-owned light DOM is projected through slots.           |
+| Public methods                                         | `methods` metadata defines methods on the custom element prototype.                   | Angular/HTML calls methods on the element instance.        |
+| Styles                                                 | `styles` metadata injects style text into the shadow/light root.                      | No CSS-in-JS runtime required.                             |
 
 ## Runtime Shape
 
@@ -134,16 +138,15 @@ import "./generated/react-components.custom-elements.js";
 
 They should not install `react` or `react-dom` for this path. The Angular example build currently produces a production `main.js` of about 157 KB raw and 45 KB brotli after moving to compiled custom elements, and a scan of that bundle finds no `react-dom`, `createRoot`, `ReactDOM`, or direct React import markers.
 
-## Unsupported Boundaries
+## Compatibility Boundaries
 
-The compiler intentionally does not promise full React compatibility yet. Unsupported APIs should produce diagnostics or documented failures instead of pulling React into production.
+The compiler implements the previously unsupported React authoring APIs without bundling React. Some semantics intentionally map to browser custom-element behavior:
 
-- React context is not yet compiled. Use explicit props or host attributes for now.
-- Effects are no-ops in the first compiler runtime. Side effects should move to custom-element lifecycle or host events.
-- Portals are not compiled yet.
-- Suspense, lazy loading, concurrent rendering, transitions, and React error boundaries are not compiled.
+- Effects run from the compiled custom-element lifecycle, not React's scheduler.
+- Transitions and deferred values are synchronous compatibility shims.
+- Lazy components schedule a custom-element rerender after their promise resolves.
+- The first renderer uses replace-rendering, not React's keyed reconciler.
 - SyntheticEvent objects do not cross the boundary. Extract stable event data.
-- Render props and function-as-children need explicit adapters.
 - CSS-in-JS runtimes are not compiled. Use `styles` metadata or static CSS.
 
 ## Why This Is Different From The Old Runtime Bridge

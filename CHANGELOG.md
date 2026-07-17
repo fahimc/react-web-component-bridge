@@ -5,6 +5,7 @@
 ### Added
 
 - Added a no-React compiler in the generator package with `compile` and `compile-folder` CLI commands. It compiles React-shaped TSX plus `defineComponentTag` metadata into vanilla Custom Element modules with no `react`, `react-dom`, JSX runtime import, or `createRoot`.
+- Added compiler-runtime support for the previously unsupported React-shaped APIs: context, reducers, effects, forwarded refs, imperative handles, portals, lazy/Suspense fallbacks, transition/deferred-value shims, external-store subscriptions, and common element helpers.
 - Added a compiled Angular example bundle generated from `examples/angular-consumer/src/react-components.tsx`; the Angular production build no longer depends on React or the React-backed test component package.
 - Added ADR 0007 and rewrote architecture, performance, limitations, troubleshooting, README, and website copy around the compiler-first no-React production path.
 - Added `replace-react-imports` / `migrate-react-imports` generator CLI commands and exported utilities for replacing exact `react` imports in a folder with the bridge React facade import.

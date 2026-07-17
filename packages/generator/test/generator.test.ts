@@ -132,23 +132,107 @@ describe("no-React compiler", () => {
     expect(events).toEqual([{ value: 2 }]);
   });
 
-  it("reports unsupported React APIs instead of silently bundling React", () => {
+  it("supports formerly unsupported React APIs through the compiler runtime", async () => {
+    const tagName = `x-compiled-rich-${Math.random().toString(16).slice(2)}`;
     const result = compileReactComponentSource({
       source: `
-        import React, { createContext, useContext } from "react";
-        const Theme = createContext("light");
-        export function Card() {
-          return <div>{useContext(Theme)}</div>;
+        import React, {
+          Suspense,
+          createContext,
+          defineComponentTag,
+          forwardRef,
+          lazy,
+          useContext,
+          useEffect,
+          useImperativeHandle,
+          useReducer
+        } from "@fahimc/react-web-component-bridge/react";
+        import { createPortal } from "react-dom";
+
+        const Theme = createContext("base");
+        const LazyBadge = lazy(() => Promise.resolve({ default: () => <strong className="lazy">Lazy ready</strong> }));
+
+        function Label() {
+          return <span className="theme">{useContext(Theme)}</span>;
         }
+
+        const RichCard = forwardRef((props: {
+          theme?: string;
+          portalTarget?: HTMLElement;
+          onEffect?: (phase: string) => void;
+        }, ref) => {
+          const [count, dispatch] = useReducer((value: number, action: { type: "inc" }) => {
+            return action.type === "inc" ? value + 1 : value;
+          }, 1);
+
+          useImperativeHandle(ref, () => ({
+            increment: () => dispatch({ type: "inc" })
+          }), []);
+
+          useEffect(() => {
+            props.onEffect?.("mounted");
+            return () => props.onEffect?.("cleanup");
+          }, []);
+
+          return (
+            <Theme.Provider value={props.theme ?? "base"}>
+              <button className="count" onClick={() => dispatch({ type: "inc" })}>{count}</button>
+              <Label />
+              <Suspense fallback={<em className="fallback">Loading</em>}>
+                <LazyBadge />
+              </Suspense>
+              {props.portalTarget ? createPortal(<span className="portal">Portal {count}</span>, props.portalTarget) : null}
+            </Theme.Provider>
+          );
+        });
+
+        defineComponentTag("${tagName}", RichCard, {
+          props: {
+            theme: { type: "string" },
+            portalTarget: { attribute: false }
+          },
+          events: {
+            onEffect: { name: "effect-phase", detail: (phase: string) => ({ phase }) }
+          },
+          methods: {
+            increment: { call: (instance: { increment(): void }) => instance.increment() }
+          }
+        });
       `
     });
 
-    expect(result.diagnostics).toContain(
-      "React context is not supported by the no-React compiler yet."
-    );
-    expect(result.diagnostics).toContain(
-      "useContext is not supported by the no-React compiler yet."
-    );
+    expect(result.diagnostics).toEqual([]);
     expect(result.code).not.toContain('from "react"');
+    expect(result.code).not.toContain("react-dom");
+
+    new Function(result.code)();
+    const portalTarget = document.createElement("div");
+    document.body.append(portalTarget);
+    const element = document.createElement(tagName) as HTMLElement & {
+      theme: string;
+      portalTarget: HTMLElement;
+      increment(): void;
+    };
+    const phases: unknown[] = [];
+    element.addEventListener("effect-phase", (event) => phases.push((event as CustomEvent).detail));
+    element.theme = "contrast";
+    element.portalTarget = portalTarget;
+    document.body.append(element);
+    await Promise.resolve();
+
+    expect(element.shadowRoot?.querySelector(".theme")?.textContent).toBe("contrast");
+    expect(element.shadowRoot?.querySelector(".count")?.textContent).toBe("1");
+    expect(element.shadowRoot?.querySelector(".fallback")?.textContent).toBe("Loading");
+    expect(portalTarget.textContent).toContain("Portal 1");
+    expect(phases).toEqual([{ phase: "mounted" }]);
+
+    element.increment();
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelector(".count")?.textContent).toBe("2");
+    expect(portalTarget.textContent).toContain("Portal 2");
+
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelector(".lazy")?.textContent).toBe("Lazy ready");
   });
 });
