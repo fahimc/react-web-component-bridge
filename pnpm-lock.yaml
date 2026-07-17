@@ -116,15 +116,6 @@ importers:
       '@angular/platform-browser':
         specifier: ^22.0.0
         version: 22.0.7(@angular/animations@22.0.7(@angular/core@22.0.7(@angular/compiler@22.0.7)(rxjs@7.8.2)(zone.js@0.16.2)))(@angular/common@22.0.7(@angular/core@22.0.7(@angular/compiler@22.0.7)(rxjs@7.8.2)(zone.js@0.16.2))(rxjs@7.8.2))(@angular/core@22.0.7(@angular/compiler@22.0.7)(rxjs@7.8.2)(zone.js@0.16.2))
-      '@fahimc/react-web-component-bridge-test-components':
-        specifier: workspace:*
-        version: link:../../packages/test-components
-      react:
-        specifier: ^19.1.0
-        version: 19.2.7
-      react-dom:
-        specifier: ^19.1.0
-        version: 19.2.7(react@19.2.7)
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
@@ -244,6 +235,9 @@ importers:
       '@fahimc/react-web-component-bridge':
         specifier: workspace:*
         version: link:../core
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
 
   packages/test-components:
     dependencies:

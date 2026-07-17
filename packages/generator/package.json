@@ -18,7 +18,8 @@
     }
   },
   "dependencies": {
-    "@fahimc/react-web-component-bridge": "workspace:*"
+    "@fahimc/react-web-component-bridge": "workspace:*",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "tsup src/index.ts src/cli.ts --format esm,cjs --sourcemap --clean && tsc -p tsconfig.build.json --emitDeclarationOnly",

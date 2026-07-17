@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import {
   BRIDGE_REACT_IMPORT,
+  compileReactComponentSource,
   generateArtifacts,
   rewriteReactImportsInFolder,
   rewriteReactImportsInText
@@ -76,5 +77,78 @@ import jsx from "react/jsx-runtime";
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("no-React compiler", () => {
+  it("compiles React-shaped TSX into executable Custom Elements without React imports", async () => {
+    const tagName = `x-compiled-counter-${Math.random().toString(16).slice(2)}`;
+    const result = compileReactComponentSource({
+      source: `
+        import React, { defineComponentTag, useMemo, useState } from "@fahimc/react-web-component-bridge/react";
+
+        function Counter(props: { label?: string; onIncrement?: (value: number) => void }) {
+          const [count, setCount] = useState(1);
+          const label = useMemo(() => props.label ?? "Count", [props.label]);
+          return (
+            <button
+              className="counter"
+              onClick={() => {
+                const next = count + 1;
+                setCount(next);
+                props.onIncrement?.(next);
+              }}
+            >
+              {label}: {count}
+            </button>
+          );
+        }
+
+        defineComponentTag("${tagName}", Counter, {
+          props: { label: { type: "string", reflect: true, default: "Count" } },
+          events: { onIncrement: { name: "increment", detail: (value: number) => ({ value }) } },
+          styles: ".counter{display:block}"
+        });
+      `
+    });
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.code).not.toContain('from "react"');
+    expect(result.code).not.toContain("react-dom");
+
+    new Function(result.code)();
+    const element = document.createElement(tagName) as HTMLElement & { label: string };
+    const events: unknown[] = [];
+    element.addEventListener("increment", (event) => events.push((event as CustomEvent).detail));
+    document.body.append(element);
+    element.label = "Clicks";
+    await Promise.resolve();
+
+    const button = element.shadowRoot?.querySelector("button");
+    expect(button?.textContent).toContain("Clicks: 1");
+    button?.click();
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelector("button")?.textContent).toContain("Clicks: 2");
+    expect(events).toEqual([{ value: 2 }]);
+  });
+
+  it("reports unsupported React APIs instead of silently bundling React", () => {
+    const result = compileReactComponentSource({
+      source: `
+        import React, { createContext, useContext } from "react";
+        const Theme = createContext("light");
+        export function Card() {
+          return <div>{useContext(Theme)}</div>;
+        }
+      `
+    });
+
+    expect(result.diagnostics).toContain(
+      "React context is not supported by the no-React compiler yet."
+    );
+    expect(result.diagnostics).toContain(
+      "useContext is not supported by the no-React compiler yet."
+    );
+    expect(result.code).not.toContain('from "react"');
   });
 });

@@ -4,6 +4,9 @@
 
 ### Added
 
+- Added a no-React compiler in the generator package with `compile` and `compile-folder` CLI commands. It compiles React-shaped TSX plus `defineComponentTag` metadata into vanilla Custom Element modules with no `react`, `react-dom`, JSX runtime import, or `createRoot`.
+- Added a compiled Angular example bundle generated from `examples/angular-consumer/src/react-components.tsx`; the Angular production build no longer depends on React or the React-backed test component package.
+- Added ADR 0007 and rewrote architecture, performance, limitations, troubleshooting, README, and website copy around the compiler-first no-React production path.
 - Added `replace-react-imports` / `migrate-react-imports` generator CLI commands and exported utilities for replacing exact `react` imports in a folder with the bridge React facade import.
 - Expanded architecture documentation with runtime, controller-stack, and React API translation diagrams.
 - Added a Netlify-ready documentation website in `site/` with a generated hero asset, live React-to-Web-Component preview editor, module documentation, supported API matrix, unsupported behavior notes, and architecture workflow page sections.
@@ -21,6 +24,7 @@
 
 ### Changed
 
+- Changed the intended Angular/plain HTML production architecture from a React-backed runtime bridge to a compiler-first custom-element output.
 - Made the facade import the recommended authoring API while keeping the lower-level bridge runtime available for advanced and generated integrations.
 - Added `build:site`, `dev:site`, and Netlify configuration for deploying the website from this repository.
 
@@ -45,5 +49,6 @@
 
 - npm publication is not performed without an explicit publish instruction and npm credentials.
 - Remote GitHub workflow publication requires a GitHub token with the `workflow` scope.
-- React remains the runtime renderer under the Web Component boundary; the package does not transpile React source into framework-native Angular code.
+- The no-React compiler supports a React-shaped subset, not arbitrary React applications. Unsupported APIs such as context, portals, Suspense, lazy loading, transitions, and full React effect timing need explicit adapters or future compiler work.
+- The legacy React-backed runtime remains available for compatibility, but it is not the correct production path for Angular/plain HTML consumers that require no React in the final bundle.
 - Body-level portals require consumer-provided global styles when Shadow DOM-only styles are insufficient.

@@ -1,122 +1,153 @@
 # Architecture
 
-React Web Component Bridge is a runtime adapter, not a React-to-Angular compiler. React remains the renderer. The bridge creates a browser-native Custom Element shell around a React component and translates the component contract into platform behavior.
+React Web Component Bridge is now compiler-first. React-shaped TSX is the authoring format, but the production Web Component bundle must not import `react`, `react-dom`, or create a React root.
 
-## System Diagram
+The legacy runtime facade can still exist for tests and migration, but the intended Angular/plain HTML distribution path is:
 
 ```text
-React source file
-  import React, { useState, defineComponentTag } from
+React-shaped TSX source
+  import React, { defineComponentTag, useState } from
   "@fahimc/react-web-component-bridge/react"
         |
         v
-Facade export layer
-  - React default and named API pass-through
-  - defineComponentTag / createComponentTag helpers
+No-React compiler
+  - removes React facade imports
+  - lowers TSX to h(...) calls
+  - replaces supported hooks with a tiny DOM runtime
+  - turns defineComponentTag(...) metadata into CustomElement classes
         |
         v
-Custom Element definition
-  tag name + props + events + slots + methods + styles + form + portal config
+Vanilla custom-element module
+  - no react import
+  - no react-dom import
+  - no createRoot
+  - no JSX runtime import
         |
         v
-Generated CustomElement class
-  connectedCallback / disconnectedCallback / attributeChangedCallback
-        |
-        v
-Controller stack
-  property -> event -> slot -> style -> portal -> form -> method -> render
-        |
-        v
-React root
-  createRoot(mount).render(<Component {...translatedProps} />)
-        |
-        v
-Browser Custom Element
-  <acme-customer-card> usable from Angular, HTML, Vue, CMS pages, or React
+Angular / HTML / Vue / CMS host
+  import "./components.custom-elements.js"
+  <acme-customer-picker></acme-customer-picker>
 ```
 
-## Runtime Ownership
+## Ownership Diagram
 
 ```text
 Host HTMLElement
-├─ Attribute/property surface owned by the browser
-├─ Optional ShadowRoot
-│  ├─ React mount part
-│  ├─ Generated <slot> wrappers
-│  ├─ Optional portal container
-│  └─ AdoptedStyleSheets or <style> fallback
-├─ Optional ElementInternals for forms
-└─ React root owned by the bridge
-   └─ User React component
++-- attribute/property API owned by the browser
++-- optional ShadowRoot
+|   +-- compiled mount node
+|   +-- generated slot elements
+|   +-- generated style element
+|   +-- DOM produced by compiled TSX
++-- internal hook cells owned by the compiled element instance
++-- custom events dispatched by the browser
 ```
 
-Each element instance normally owns one React root. This keeps lifecycle isolation simple: removing the element unmounts the root, clears queued updates, disconnects controllers, and releases portal/style/form state.
+There is no React root in this path. Each custom element instance owns a small hook array and rerenders its compiled virtual tree into real DOM. The first implementation uses replace-rendering for correctness and simplicity; later versions can add keyed DOM reconciliation without changing the public tag contract.
 
-## React API Translation
-
-| React-facing API                                                    | What the facade does                                                                                      | What crosses the Web Component boundary                                                                                        |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `React` default export                                              | Re-exports the installed peer React package.                                                              | Nothing special; React still renders internally.                                                                               |
-| `createElement`, `Fragment`, `StrictMode`, `Suspense`               | Pass-through exports so component code can keep normal React imports.                                     | Rendered React output becomes DOM inside the element mount.                                                                    |
-| Hooks such as `useState`, `useEffect`, `useMemo`, `useRef`, `useId` | Pass-through exports. Hook semantics are unchanged because React is still the renderer.                   | Hook state never crosses the boundary directly. Only rendered DOM, configured props, events, refs, and methods do.             |
-| `memo`, `forwardRef`, `lazy`                                        | Pass-through exports.                                                                                     | `forwardRef` can back public methods when configured. `lazy` still needs the consumer bundle to resolve the lazy module.       |
-| React callback props such as `onSelect`                             | The event controller supplies a callback prop to React.                                                   | Calling that callback dispatches a native `CustomEvent` with configured name/detail/bubbles/composed/cancelable behavior.      |
-| React `children`                                                    | Slot controller maps default and named slots to React props.                                              | Consumers own slotted DOM. React receives stable `<slot>` wrappers, not cloned DOM nodes.                                      |
-| Context providers                                                   | Global `configureReactApi({ wrap })` and per-definition `wrap` functions surround the rendered component. | Context stays inside React. Hosts configure attributes/properties that wrappers can read from the element.                     |
-| Refs and imperative APIs                                            | Method controller calls methods exposed by a forwarded React ref.                                         | Consumers call methods on the custom element instance. Calls can throw before mount or queue when configured.                  |
-| Portals                                                             | Portal controller creates/provides a target element.                                                      | Overlays can render in shadow DOM, host, body, a supplied element, or a function target.                                       |
-| Form values                                                         | Form controller syncs a configured prop into `ElementInternals`.                                          | Native form submission, `input`, and `change` behavior are exposed where the browser supports form-associated custom elements. |
-
-## Controller Stack
+## Compiler Pipeline
 
 ```text
-attributeChangedCallback / property setter
+Source scan
+  find .tsx/.jsx files
         |
         v
-PropertyController
-  parse -> validate -> transform -> reflect -> schedule render
+Import stripping
+  remove react / react-dom / bridge facade imports
         |
         v
-RenderController
-  microtask batch -> wrapper chain -> React root render
+TypeScript TSX lowering
+  JSX -> h("tag", props, children)
+  types removed
         |
-        +--> SlotController supplies children / named slot props
-        +--> StyleController installs scoped styles
-        +--> PortalController supplies overlay target prop
-        +--> FormController updates ElementInternals
-        +--> MethodController forwards host methods to React ref
-        +--> EventController turns React callbacks into CustomEvents
+        v
+Runtime injection
+  h, Fragment, useState, useMemo, useRef, defineComponentTag
+        |
+        v
+Custom element generation
+  observedAttributes, property accessors, slots, events, methods, styles
+        |
+        v
+Production bundle
+  browser-native JavaScript with no React runtime dependency
 ```
 
-The controllers are split because browser lifecycle, React lifecycle, form internals, event conversion, and style adoption fail in different ways. Keeping them separate makes tests and integration bugs more targeted.
+CLI commands:
 
-## Import Replacement Workflow
+```bash
+react-web-component-bridge compile --input src/customer-picker.tsx --out-file dist/customer-picker.js
+react-web-component-bridge compile-folder --dir src/components --out-dir dist/components
+```
 
-The generator package includes a codemod-style command for moving a folder of existing React components onto the facade import:
+The existing import migration command is still useful before compilation:
 
 ```bash
 react-web-component-bridge replace-react-imports --dir src/components --dry-run
 react-web-component-bridge replace-react-imports --dir src/components
 ```
 
-It rewrites exact `react` module specifiers:
+## React API Translation
 
-```diff
-- import React, { useState } from "react";
-+ import React, { useState } from "@fahimc/react-web-component-bridge/react";
+| React-shaped API                                  | Compiler behavior                                                                          | Production result                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `React` default import                            | Removed when it is only needed for TSX/types.                                              | No React object in the bundle.                               |
+| TSX elements                                      | Lowered to `h(type, props, ...children)` and rendered by the generated DOM runtime.        | Real DOM nodes inside the custom element.                    |
+| `Fragment` / `<>...</>`                           | Lowered to a compiler fragment token.                                                      | `DocumentFragment` content.                                  |
+| `useState`                                        | Replaced by per-element hook cells and a queued custom-element rerender.                   | State lives on the element instance, not in React.           |
+| `useMemo`                                         | Replaced by dependency-array memo cells.                                                   | Memoized values live on the element instance.                |
+| `useRef`                                          | Replaced by `{ current }` cells; JSX `ref` assigns DOM elements.                           | DOM refs without React.                                      |
+| `useCallback`, `memo`                             | Currently identity helpers.                                                                | No React memo scheduler.                                     |
+| `useEffect`, `useLayoutEffect`                    | Currently no-ops in the compiler runtime.                                                  | Side effects should move to DOM events or element lifecycle. |
+| Component props                                   | `defineComponentTag` metadata creates DOM property accessors and observed attributes.      | Angular assigns properties; attributes stay primitive.       |
+| Callback props such as `onCustomerSelect`         | Compiler injects functions from `events` metadata.                                         | Calling the prop dispatches `CustomEvent`.                   |
+| `children` and named content                      | `slots` metadata creates `<slot>` nodes passed as props.                                   | Host-owned light DOM is projected through slots.             |
+| Public methods                                    | `methods` metadata defines methods on the custom element prototype.                        | Angular/HTML calls methods on the element instance.          |
+| Styles                                            | `styles` metadata injects style text into the shadow/light root.                           | No CSS-in-JS runtime required.                               |
+| `createContext`, `useContext`, `forwardRef`, etc. | Reported as unsupported by the no-React compiler until native equivalents are implemented. | Build-time diagnostic, not hidden React bundling.            |
+| `createPortal`, `Suspense`, `lazy`                | Reported as unsupported.                                                                   | Build-time diagnostic, not hidden React bundling.            |
 
-- export type { ReactNode } from "react";
-+ export type { ReactNode } from "@fahimc/react-web-component-bridge/react";
+## Runtime Shape
+
+The generated runtime is deliberately small and browser-native:
+
+```text
+defineComponentTag
++-- creates custom element class
++-- maps attributes to props
++-- maps property setters to queued rerenders
++-- creates event callback props
++-- creates slot vnode props
++-- injects styles
++-- renders compiled h(...) trees to DOM
 ```
 
-It intentionally does not rewrite `react-dom`, `react-dom/client`, `react/jsx-runtime`, or framework imports. Those packages still have their normal jobs: ReactDOM creates roots inside the bridge, and JSX runtime imports are emitted by the compiler/bundler.
+The runtime does not attempt to be React. It supports the subset needed to keep common component source readable while making the production artifact independent of React.
 
-## Translation Boundaries
+## Angular Bundle Contract
 
-The bridge translates runtime contracts, not arbitrary source code. That means:
+Angular consumers should import only the compiled output:
 
-- Props and attributes are explicit. Primitive props can reflect to attributes; objects, arrays, functions, and React nodes should stay property-only.
-- Events are explicit. React SyntheticEvents should not be sent through `CustomEvent.detail`; extract stable data first.
-- Styles are explicit. Shadow DOM styles do not automatically style body-level portals.
-- SSR import is safe, but custom-element registration must run in a browser with `customElements`.
-- Angular/Vue/HTML consumers receive browser elements, not React components.
+```ts
+import "./generated/react-components.custom-elements.js";
+```
+
+They should not install `react` or `react-dom` for this path. The Angular example build currently produces a production `main.js` of about 157 KB raw and 45 KB brotli after moving to compiled custom elements, and a scan of that bundle finds no `react-dom`, `createRoot`, `ReactDOM`, or direct React import markers.
+
+## Unsupported Boundaries
+
+The compiler intentionally does not promise full React compatibility yet. Unsupported APIs should produce diagnostics or documented failures instead of pulling React into production.
+
+- React context is not yet compiled. Use explicit props or host attributes for now.
+- Effects are no-ops in the first compiler runtime. Side effects should move to custom-element lifecycle or host events.
+- Portals are not compiled yet.
+- Suspense, lazy loading, concurrent rendering, transitions, and React error boundaries are not compiled.
+- SyntheticEvent objects do not cross the boundary. Extract stable event data.
+- Render props and function-as-children need explicit adapters.
+- CSS-in-JS runtimes are not compiled. Use `styles` metadata or static CSS.
+
+## Why This Is Different From The Old Runtime Bridge
+
+The old runtime bridge kept React intact by mounting a React root inside every custom element. That was useful for compatibility, but it still shipped React to Angular users.
+
+The compiler path keeps the authoring style, not the React runtime. The final artifact is a browser Custom Element module with a small generated DOM runtime.

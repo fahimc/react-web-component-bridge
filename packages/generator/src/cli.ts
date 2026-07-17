@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { BRIDGE_REACT_IMPORT, generateArtifacts, rewriteReactImportsInFolder } from "./index";
+import {
+  BRIDGE_REACT_IMPORT,
+  compileReactFile,
+  compileReactFolder,
+  defaultCompiledOutFile,
+  generateArtifacts,
+  rewriteReactImportsInFolder
+} from "./index";
 import type { ReactElementMetadata } from "@fahimc/react-web-component-bridge";
 
 type GenerateCliOptions = {
@@ -17,10 +24,40 @@ type RewriteCliOptions = {
   replacement: string;
 };
 
-type CliOptions = GenerateCliOptions | RewriteCliOptions;
+type CompileCliOptions = {
+  command: "compile";
+  input: string;
+  outFile: string;
+};
+
+type CompileFolderCliOptions = {
+  command: "compile-folder";
+  dir: string;
+  outDir: string;
+};
+
+type CliOptions =
+  GenerateCliOptions | RewriteCliOptions | CompileCliOptions | CompileFolderCliOptions;
 
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
+  if (options.command === "compile") {
+    await compileReactFile({ input: options.input, outFile: options.outFile });
+    console.log(`Compiled ${resolve(options.input)} -> ${resolve(options.outFile)} without React.`);
+    return;
+  }
+
+  if (options.command === "compile-folder") {
+    const result = await compileReactFolder({ rootDir: options.dir, outDir: options.outDir });
+    console.log(
+      `Compiled ${result.files.length} React-shaped component file(s) into ${result.outDir} without React.`
+    );
+    for (const file of result.files) {
+      console.log(`${file.input} -> ${file.output}`);
+    }
+    return;
+  }
+
   if (options.command === "replace-react-imports") {
     const result = await rewriteReactImportsInFolder({
       rootDir: options.dir,
@@ -62,6 +99,28 @@ function parseArgs(args: string[]): CliOptions {
     return { command, input, outDir };
   }
 
+  if (command === "compile") {
+    const input = valueAfter(args, "--input") ?? (args[1]?.startsWith("-") ? undefined : args[1]);
+    if (!input) {
+      throw new Error("Missing --input.");
+    }
+    return {
+      command,
+      input,
+      outFile: valueAfter(args, "--out-file") ?? defaultCompiledOutFile(input)
+    };
+  }
+
+  if (command === "compile-folder") {
+    const positionalDir = args[1]?.startsWith("-") ? undefined : args[1];
+    const dir = valueAfter(args, "--dir") ?? positionalDir;
+    const outDir = valueAfter(args, "--out-dir");
+    if (!dir || !outDir) {
+      throw new Error("Missing folder options. Use compile-folder --dir src --out-dir dist.");
+    }
+    return { command, dir, outDir };
+  }
+
   if (command === "replace-react-imports" || command === "migrate-react-imports") {
     const positionalDir = args[1]?.startsWith("-") ? undefined : args[1];
     const dir = valueAfter(args, "--dir") ?? positionalDir;
@@ -80,6 +139,8 @@ function parseArgs(args: string[]): CliOptions {
     [
       "Usage:",
       "  react-web-component-bridge generate --input metadata.json --out-dir dist",
+      "  react-web-component-bridge compile --input src/card.tsx --out-file dist/card.js",
+      "  react-web-component-bridge compile-folder --dir src/components --out-dir dist/components",
       "  react-web-component-bridge replace-react-imports --dir src [--dry-run]",
       "  react-web-component-bridge migrate-react-imports src [--dry-run]"
     ].join("\n")

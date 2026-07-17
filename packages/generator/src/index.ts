@@ -2,6 +2,21 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import type { ReactElementMetadata } from "@fahimc/react-web-component-bridge";
 
+export {
+  compileReactComponentSource,
+  compileReactFile,
+  compileReactFolder,
+  compilerRuntimeForTesting,
+  defaultCompiledOutFile
+} from "./compiler";
+export type {
+  CompileReactComponentOptions,
+  CompileReactComponentResult,
+  CompileReactFileOptions,
+  CompileReactFolderOptions,
+  CompileReactFolderResult
+} from "./compiler";
+
 export const BRIDGE_REACT_IMPORT = "@fahimc/react-web-component-bridge/react";
 
 export type GeneratorOutput = {

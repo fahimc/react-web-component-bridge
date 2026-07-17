@@ -29,127 +29,114 @@ declare module "react" {
 }
 
 const supportedApis = [
-  "default React export",
-  "createElement",
-  "Fragment",
-  "StrictMode",
-  "Suspense",
-  "memo",
-  "forwardRef",
-  "lazy",
-  "createContext",
-  "createRef",
-  "Children",
-  "cloneElement",
-  "isValidElement",
-  "startTransition",
+  "TSX elements and fragments",
+  "Function components",
   "useState",
-  "useReducer",
-  "useEffect",
-  "useLayoutEffect",
   "useMemo",
-  "useCallback",
   "useRef",
-  "useContext",
-  "useId",
-  "useImperativeHandle",
-  "useInsertionEffect",
-  "useDeferredValue",
-  "useSyncExternalStore",
-  "useTransition",
-  "useDebugValue"
+  "identity useCallback and memo",
+  "props and primitive attributes",
+  "property-only arrays and objects",
+  "slots",
+  "CustomEvent callback props",
+  "public custom-element methods",
+  "static styles"
 ];
 
 const unsupportedItems = [
-  "Source-to-source conversion from React into Angular components",
-  "Server-side registration of custom elements without a browser customElements registry",
-  "Passing React SyntheticEvent objects across the Web Component boundary",
-  "Serializing functions, class instances, React nodes, or large object graphs into HTML attributes",
-  "Automatically rewriting CSS modules, runtime CSS-in-JS caches, or app-level routing assumptions",
-  "Sharing one React root across every element instance",
-  "Hydrating a server-rendered custom element tree as if it were a native React root"
+  "React context and providers",
+  "createPortal, Suspense, lazy, transitions, and concurrent rendering",
+  "forwardRef and useImperativeHandle in compiled output",
+  "React effect timing semantics",
+  "React SyntheticEvent transport",
+  "CSS-in-JS runtime extraction",
+  "full React reconciliation or hydration"
 ];
 
 const workflowSteps = [
-  "Author ordinary React component code through the facade import.",
-  "Attach a tag contract with defineComponentTag or export a deferred createComponentTag definition.",
-  "Bundle the component package once for the browser.",
-  "The bridge creates a CustomElement class and installs lifecycle, props, style, slot, method, form, and event controllers.",
-  "When Angular or HTML adds the tag, the element receives attributes and properties like any browser element.",
-  "The bridge batches updates, renders the React component into the configured shadow or light DOM root, and converts callback props into CustomEvent dispatches.",
-  "Consumer frameworks handle the result as a platform custom element, not as a React subtree."
+  "Author React-shaped TSX through the bridge facade import.",
+  "Attach a tag contract with defineComponentTag.",
+  "Run the no-React compiler against one file or a component folder.",
+  "The compiler strips React imports, lowers TSX, and injects the small DOM runtime.",
+  "The emitted module defines CustomElement classes with props, attributes, slots, events, methods, and styles.",
+  "Angular or HTML imports the compiled module and uses platform tags.",
+  "The production bundle contains no react, react-dom, JSX runtime import, or createRoot call."
 ];
 
 const architectureLayers = [
-  { label: "React source", detail: "Component code imports React APIs from the bridge facade." },
-  { label: "Facade layer", detail: "React exports pass through; tag helpers create definitions." },
+  { label: "React-shaped TSX", detail: "Component code imports authoring APIs from the facade." },
+  { label: "Compiler", detail: "React imports are removed and TSX is lowered to h(...) calls." },
   {
-    label: "Definition model",
+    label: "Tag contract",
     detail: "Props, attributes, events, slots, methods, styles, forms, portals."
   },
   {
-    label: "CustomElement class",
-    detail: "Browser lifecycle owns connect, disconnect, and attributes."
+    label: "Vanilla runtime",
+    detail: "Hook cells, DOM rendering, CustomEvents, and slot projection."
   },
-  { label: "Controller stack", detail: "Each boundary concern is isolated and tested separately." },
-  { label: "React root", detail: "React renders the original component into the element mount." },
+  {
+    label: "CustomElement class",
+    detail: "Browser lifecycle owns connect, attributes, and properties."
+  },
+  {
+    label: "No React bundle",
+    detail: "No react, react-dom, JSX runtime, or createRoot in output."
+  },
   { label: "Platform tag", detail: "Angular, HTML, Vue, or CMS pages consume the browser element." }
 ];
 
 const controllerLayers = [
-  "PropertyController: parse, validate, transform, reflect, schedule",
-  "RenderController: microtask batching, wrappers, React root render",
-  "EventController: callback prop to CustomEvent dispatcher",
-  "SlotController: default and named slots as React props",
-  "StyleController: adoptedStyleSheets with style fallback",
-  "PortalController: shadow, host, body, element, or function target",
-  "FormController: ElementInternals value and validity",
-  "MethodController: host methods forwarded to React refs"
+  "Import stripper: removes react, react-dom, and facade imports",
+  "TSX lowering: converts JSX into h(...) calls",
+  "Hook cells: useState, useMemo, and useRef without React",
+  "Property mapper: attributes and DOM properties into compiled props",
+  "Event mapper: callback props into CustomEvent dispatchers",
+  "Slot mapper: default and named slots into vnode props",
+  "Method mapper: custom-element prototype methods",
+  "DOM renderer: creates browser nodes from compiled vnodes"
 ];
 
 const apiTranslations = [
   {
-    api: "React default, createElement, Fragment, StrictMode, Suspense",
-    translation: "Pass-through facade exports.",
-    boundary: "No source rewrite at runtime. React still renders internally."
+    api: "React default import and TSX",
+    translation: "Import is stripped and TSX lowers to h(...) calls.",
+    boundary: "No React object or JSX runtime import in the production module."
   },
   {
-    api: "Hooks: useState, useEffect, useMemo, useRef, useId, useTransition",
-    translation: "Pass-through facade exports with unchanged hook semantics.",
-    boundary: "Hook state stays inside the React root; hosts see DOM, props, methods, and events."
+    api: "Hooks: useState, useMemo, useRef",
+    translation: "Compiled to per-element hook cells.",
+    boundary: "State lives on the custom element instance, not in React."
   },
   {
-    api: "memo, forwardRef, lazy, createContext",
-    translation: "Pass-through exports.",
-    boundary:
-      "forwardRef can back public methods; context remains internal to wrapper/provider chains."
+    api: "memo and useCallback",
+    translation: "Identity helpers in the compiler runtime.",
+    boundary: "They preserve source shape without shipping React memoization."
   },
   {
     api: "Component props",
-    translation: "Property controller maps host properties and attributes to React props.",
+    translation: "Generated accessors map host properties and attributes to compiled props.",
     boundary:
       "Primitives can reflect to attributes; objects, arrays, functions, and nodes stay property-only."
   },
   {
     api: "Callback props",
-    translation: "Event controller injects callbacks into React.",
+    translation: "Compiler injects callback props from event metadata.",
     boundary: "Calling the callback dispatches a browser CustomEvent with configured detail."
   },
   {
     api: "children and named content",
-    translation: "Slot controller supplies stable slot wrappers as React props.",
-    boundary: "The consumer owns slotted DOM; React does not clone or reconcile those nodes."
+    translation: "Slot metadata creates default and named slot vnodes.",
+    boundary: "The consumer owns slotted DOM; the compiled runtime projects it."
   },
   {
     api: "Refs and imperative methods",
-    translation: "Method controller calls a forwarded React ref.",
+    translation: "JSX refs point at DOM nodes; public methods come from tag metadata.",
     boundary: "Consumers call methods on the custom element instance."
   },
   {
-    api: "Portals and forms",
-    translation: "Portal and form controllers provide targets and ElementInternals integration.",
-    boundary:
-      "Overlays and form values become platform behavior while React remains the UI renderer."
+    api: "Context, portals, Suspense, lazy",
+    translation: "Reported as unsupported in the no-React compiler path.",
+    boundary: "Unsupported APIs must not silently bundle React."
   }
 ];
 
@@ -186,7 +173,8 @@ export function MetricCard({
 }
 
 function buildBridgeSource(tagName: string) {
-  return `defineComponentTag("${tagName}", MetricCard, {
+  return `// Authoring contract. The compiler turns this into a vanilla Custom Element.
+defineComponentTag("${tagName}", MetricCard, {
   shadow: { mode: "open" },
   props: {
     heading: { type: "string", reflect: true },
@@ -200,7 +188,10 @@ function buildBridgeSource(tagName: string) {
       detail: (payload) => payload
     }
   }
-});`;
+});
+
+// Build command:
+// react-web-component-bridge compile --input metric-card.tsx --out-file metric-card.web-components.js`;
 }
 
 function buildHtmlUsage(
@@ -228,7 +219,7 @@ function buildHtmlUsage(
 }
 
 function buildAngularUsage(tagName: string) {
-  return `import "@acme/metric-card/web-components";
+  return `import "./generated/metric-card.web-components.js";
 
 @Component({
   selector: "app-root",
@@ -259,7 +250,7 @@ function App() {
   const [source, setSource] = useState(() =>
     buildReactSource("Release health", "emerald", 98, false)
   );
-  const [activeOutput, setActiveOutput] = useState("bridge");
+  const [activeOutput, setActiveOutput] = useState("compile");
   const [lastEvent, setLastEvent] = useState("No CustomEvent captured yet.");
   const previewRef = useRef<CustomPreviewElement>(null);
 
@@ -319,12 +310,12 @@ function App() {
 
       <section className="hero" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">React API facade for browser-native tags</p>
-          <h1>Keep React components intact. Ship them as Web Components.</h1>
+          <p className="eyebrow">React-shaped TSX to no-React browser tags</p>
+          <h1>Keep React authoring. Ship Web Components without React.</h1>
           <p className="lede">
-            Import React authoring APIs from the bridge facade, define a custom-element tag, and let
-            Angular, plain HTML, Vue, or any standards-based host consume the result without
-            rewriting the original React component.
+            Import authoring APIs from the bridge facade, define a custom-element tag, and compile
+            the result into browser-native JavaScript that Angular, plain HTML, Vue, or any
+            standards-based host can consume without React in the production bundle.
           </p>
           <div className="hero-actions">
             <a className="button primary" href="#editor">
@@ -336,16 +327,16 @@ function App() {
           </div>
           <dl className="hero-facts">
             <div>
-              <dt>React</dt>
-              <dd>18.3+ and 19.x peer support</dd>
+              <dt>Authoring</dt>
+              <dd>React-shaped TSX subset</dd>
             </div>
             <div>
               <dt>Output</dt>
-              <dd>Custom Elements with optional Shadow DOM</dd>
+              <dd>No-React Custom Elements</dd>
             </div>
             <div>
               <dt>Consumers</dt>
-              <dd>Angular, HTML, Vue, React, CMS pages</dd>
+              <dd>Angular, HTML, Vue, CMS pages</dd>
             </div>
           </dl>
         </div>
@@ -357,18 +348,18 @@ function App() {
       <section className="band editor-band" id="editor">
         <div className="section-heading">
           <p className="eyebrow">Live conversion preview</p>
-          <h2>React source, bridge contract, and rendered custom element in one workspace.</h2>
+          <h2>React-shaped source, compiler contract, and rendered custom element.</h2>
           <p>
-            The editor shows the authoring model the package is built around. React code stays
-            React-shaped; the tag contract controls how props, attributes, and events cross the
-            browser boundary.
+            The editor shows the authoring model the compiler is built around. Component code stays
+            React-shaped; the tag contract controls how props, attributes, and events become browser
+            behavior.
           </p>
         </div>
 
         <div className="editor-shell">
           <section className="editor-pane" aria-label="React component editor">
             <div className="pane-header">
-              <span>React component</span>
+              <span>React-shaped component</span>
               <span>@fahimc/react-web-component-bridge/react</span>
             </div>
             <textarea
@@ -420,7 +411,7 @@ function App() {
           <section className="preview-pane" aria-label="Custom element preview">
             <div className="pane-header">
               <span>&lt;rwcb-site-preview&gt;</span>
-              <span>Live Custom Element</span>
+              <span>Live Custom Element preview</span>
             </div>
             <rwcb-site-preview
               ref={previewRef}
@@ -434,7 +425,7 @@ function App() {
 
           <section className="output-pane" aria-label="Generated usage output">
             <div className="tabs" role="tablist" aria-label="Generated output">
-              {["bridge", "html", "angular"].map((tab) => (
+              {["compile", "html", "angular"].map((tab) => (
                 <button
                   key={tab}
                   type="button"
@@ -461,9 +452,9 @@ function App() {
           <article>
             <h3>What it is</h3>
             <p>
-              A small TypeScript runtime and React facade that turns React component definitions
-              into browser Custom Elements. It does not ask teams to rewrite UI in Angular or
-              duplicate component libraries.
+              A compiler and tiny DOM runtime that turns React-shaped TSX component definitions into
+              browser Custom Elements. Angular users import the compiled output without installing
+              React.
             </p>
           </article>
           <article>
@@ -480,8 +471,8 @@ defineComponentTag("acme-customer-card", CustomerCard, {
           <article>
             <h3>Angular consumption</h3>
             <p>
-              Import the generated bundle once, add <code>CUSTOM_ELEMENTS_SCHEMA</code>, and render
-              the tag. Assign arrays, objects, and functions as DOM properties. Listen for native{" "}
+              Import the compiled bundle once, add <code>CUSTOM_ELEMENTS_SCHEMA</code>, and render
+              the tag. Assign arrays and objects as DOM properties. Listen for native{" "}
               <code>CustomEvent</code> objects through Angular handlers.
             </p>
           </article>
@@ -492,6 +483,18 @@ defineComponentTag("acme-customer-card", CustomerCard, {
               property-only values from JavaScript. Attribute reflection handles primitive values
               where configured.
             </p>
+          </article>
+          <article>
+            <h3>No-React compile</h3>
+            <p>
+              Compile one component file or a folder of TSX files. The emitted browser module has no{" "}
+              <code>react</code>, <code>react-dom</code>, JSX runtime import, or{" "}
+              <code>createRoot</code>.
+            </p>
+            <pre>
+              <code>{`react-web-component-bridge compile --input src/card.tsx --out-file dist/card.js
+react-web-component-bridge compile-folder --dir src/components --out-dir dist/components`}</code>
+            </pre>
           </article>
           <article>
             <h3>Import replacement</h3>
@@ -509,12 +512,12 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
 
       <section className="band support-band" id="support">
         <div className="section-heading">
-          <p className="eyebrow">Supported React API and versions</p>
-          <h2>Facade coverage for current component authoring.</h2>
+          <p className="eyebrow">Supported compiler subset</p>
+          <h2>React-shaped authoring without React in production.</h2>
           <p>
-            The package declares React and ReactDOM as peer dependencies and supports React 18.3 or
-            newer and React 19.x. The facade re-exports common React authoring APIs so component
-            files can keep a familiar import surface.
+            The compiler supports a practical subset of component TSX and fails visibly for React
+            APIs that would otherwise require the real React runtime. Unsupported APIs are roadmap
+            items, not hidden bundle dependencies.
           </p>
         </div>
         <div className="support-layout">
@@ -540,10 +543,10 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
       <section className="band architecture-band" id="architecture">
         <div className="section-heading">
           <p className="eyebrow">Architecture and translation workflow</p>
-          <h2>Runtime adaptation, not framework transpilation.</h2>
+          <h2>Compile-time adaptation, not a hidden React root.</h2>
           <p>
-            The workflow translates a component contract into platform behavior. React still renders
-            the component. The bridge owns the custom-element shell around it.
+            The workflow translates a React-shaped component contract into platform behavior. The
+            emitted bundle is vanilla JavaScript that defines Custom Elements.
           </p>
         </div>
         <div className="architecture-layout">
@@ -553,11 +556,11 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
             ))}
           </ol>
           <div className="architecture-map" aria-label="Bridge architecture map">
-            <div>React facade</div>
+            <div>TSX source</div>
             <span>props</span>
-            <div>CustomElement class</div>
-            <span>render</span>
-            <div>React root</div>
+            <div>No-React compiler</div>
+            <span>lower</span>
+            <div>DOM runtime</div>
             <span>events</span>
             <div>Angular or HTML tag</div>
           </div>
@@ -613,10 +616,10 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
       <section className="band install-band">
         <div className="section-heading">
           <p className="eyebrow">Install</p>
-          <h2>Use the bridge package with your existing React runtime.</h2>
+          <h2>Compile React-shaped TSX into browser Custom Elements.</h2>
         </div>
         <pre className="install-command">
-          <code>pnpm add @fahimc/react-web-component-bridge react react-dom</code>
+          <code>pnpm add -D @fahimc/react-web-component-bridge-generator</code>
         </pre>
       </section>
     </main>

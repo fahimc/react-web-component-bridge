@@ -1,17 +1,38 @@
 # Troubleshooting
 
-## Registration throws on the server
+## The compiled bundle still contains React
 
-Move `defineReactElement()` behind a browser-only guard or client entry point.
+Run a direct scan on the built artifact:
+
+```bash
+rg -n 'react-dom|createRoot|ReactDOM|from "react"|from '\''react'\''' dist
+```
+
+If it matches, check that Angular imports the compiler output, not the legacy React-backed runtime package.
+
+## The compiler reports an unsupported React API
+
+The no-React compiler does not silently include React to preserve unsupported behavior. Replace the API with an explicit custom-element contract or keep that component on the legacy runtime path.
+
+Common replacements:
+
+- context -> explicit props or host attributes,
+- `forwardRef` / `useImperativeHandle` -> `methods` metadata,
+- portals -> host-managed overlay outlet,
+- effects -> custom-element lifecycle or host events.
 
 ## Object props are strings
 
 Use `attribute: false` and assign the value as a DOM property.
 
+```ts
+picker.customers = customers;
+```
+
 ## Events are not heard outside Shadow DOM
 
-Use `composed: true`, which is the default.
+Compiled event metadata dispatches `CustomEvent` with `bubbles: true` and `composed: true` by default. Check that the callback prop is listed in `events`.
 
-## React is bundled twice
+## Registration throws on the server
 
-Check that React and ReactDOM are peer dependencies in component packages and app bundlers resolve one copy.
+Custom-element registration needs a browser `customElements` registry. Import compiled element bundles only in browser/client entry points.
