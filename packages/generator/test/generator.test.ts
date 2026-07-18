@@ -235,4 +235,57 @@ describe("no-React compiler", () => {
     await Promise.resolve();
     expect(element.shadowRoot?.querySelector(".lazy")?.textContent).toBe("Lazy ready");
   });
+
+  it("compiles existing React imports with external tag registration metadata", async () => {
+    const tagName = `x-existing-react-import-${Math.random().toString(16).slice(2)}`;
+    const result = compileReactComponentSource({
+      source: `
+        import React, { useState } from "react";
+
+        export function ExistingCounter(props: {
+          label?: string;
+          onChange?: (value: number) => void;
+        }) {
+          const [count, setCount] = useState(0);
+          return (
+            <button onClick={() => {
+              const next = count + 1;
+              setCount(next);
+              props.onChange?.(next);
+            }}>
+              {props.label}: {count}
+            </button>
+          );
+        }
+      `,
+      registrations: [
+        {
+          tagName,
+          component: "ExistingCounter",
+          options: {
+            props: { label: { type: "string", default: "Clicks" } },
+            events: { onChange: { name: "change" } }
+          }
+        }
+      ]
+    });
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.code).not.toContain('from "react"');
+    expect(result.code).toContain(`defineComponentTag("${tagName}", ExistingCounter`);
+
+    new Function(result.code)();
+    const element = document.createElement(tagName);
+    const events: unknown[] = [];
+    element.addEventListener("change", (event) => events.push((event as CustomEvent).detail));
+    document.body.append(element);
+    await Promise.resolve();
+
+    const button = element.shadowRoot?.querySelector("button");
+    expect(button?.textContent).toBe("Clicks: 0");
+    button?.click();
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelector("button")?.textContent).toBe("Clicks: 1");
+    expect(events).toEqual([1]);
+  });
 });

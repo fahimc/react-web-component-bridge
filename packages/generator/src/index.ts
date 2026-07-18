@@ -14,7 +14,8 @@ export type {
   CompileReactComponentResult,
   CompileReactFileOptions,
   CompileReactFolderOptions,
-  CompileReactFolderResult
+  CompileReactFolderResult,
+  CompileReactRegistration
 } from "./compiler";
 
 export const BRIDGE_REACT_IMPORT = "@fahimc/react-web-component-bridge/react";

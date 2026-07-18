@@ -22,12 +22,10 @@ React can remain in the authoring workspace for types and migration, but Angular
 
 ## Author React-Shaped TSX
 
+Existing React imports can stay as-is. The compiler strips `react` imports and provides compiler-runtime equivalents in the emitted bundle.
+
 ```tsx
-import React, {
-  defineComponentTag,
-  useMemo,
-  useState
-} from "@fahimc/react-web-component-bridge/react";
+import React, { useMemo, useState } from "react";
 
 type Customer = { id: string; name: string };
 
@@ -51,6 +49,52 @@ function CustomerPicker(props: {
     </section>
   );
 }
+```
+
+Then supply the Web Component tag contract from the CLI or a JSON definition file:
+
+```bash
+react-web-component-bridge compile \
+  --input src/customer-picker.tsx \
+  --out-file dist/customer-picker.custom-elements.js \
+  --tag acme-customer-picker \
+  --component CustomerPicker
+```
+
+For richer props, events, slots, methods, and styles, use a definition file:
+
+```json
+{
+  "tagName": "acme-customer-picker",
+  "component": "CustomerPicker",
+  "options": {
+    "props": {
+      "customers": { "attribute": false, "default": [] },
+      "selectedId": { "attribute": "selected-id", "type": "string" }
+    },
+    "events": {
+      "onCustomerSelect": { "name": "customer-select" }
+    },
+    "styles": ":host{display:block}"
+  }
+}
+```
+
+```bash
+react-web-component-bridge compile \
+  --input src/customer-picker.tsx \
+  --out-file dist/customer-picker.custom-elements.js \
+  --definition customer-picker.rwcb.json
+```
+
+You can still define the tag inline when component authors own the source:
+
+```tsx
+import React, {
+  defineComponentTag,
+  useMemo,
+  useState
+} from "@fahimc/react-web-component-bridge/react";
 
 defineComponentTag("acme-customer-picker", CustomerPicker, {
   props: {
@@ -72,7 +116,9 @@ defineComponentTag("acme-customer-picker", CustomerPicker, {
 ```bash
 react-web-component-bridge compile \
   --input src/customer-picker.tsx \
-  --out-file dist/customer-picker.custom-elements.js
+  --out-file dist/customer-picker.custom-elements.js \
+  --tag acme-customer-picker \
+  --component CustomerPicker
 ```
 
 For a folder:
@@ -83,15 +129,15 @@ react-web-component-bridge compile-folder --dir src/components --out-dir dist/co
 
 The compiler:
 
-- removes React facade imports,
+- removes React imports,
 - lowers TSX to a small DOM runtime,
 - replaces supported hooks with per-element hook cells,
-- turns `defineComponentTag` metadata into custom-element classes,
+- turns inline or external tag metadata into custom-element classes,
 - emits JavaScript that does not import React or ReactDOM.
 
 ## Replace Existing React Imports
 
-For migration, rewrite exact `react` imports to the bridge facade before compiling:
+Import replacement is optional for the compiler path. Use it only when you want source files to import bridge-only authoring helpers inline.
 
 ```bash
 react-web-component-bridge replace-react-imports --dir src/components --dry-run

@@ -10,6 +10,7 @@ import {
   rewriteReactImportsInFolder
 } from "./index";
 import type { ReactElementMetadata } from "@fahimc/react-web-component-bridge";
+import type { CompileReactRegistration } from "./index";
 
 type GenerateCliOptions = {
   command: "generate";
@@ -28,6 +29,9 @@ type CompileCliOptions = {
   command: "compile";
   input: string;
   outFile: string;
+  tagName?: string | undefined;
+  component?: string | undefined;
+  definition?: string | undefined;
 };
 
 type CompileFolderCliOptions = {
@@ -42,7 +46,11 @@ type CliOptions =
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   if (options.command === "compile") {
-    await compileReactFile({ input: options.input, outFile: options.outFile });
+    await compileReactFile({
+      input: options.input,
+      outFile: options.outFile,
+      registrations: await compileRegistrations(options)
+    });
     console.log(`Compiled ${resolve(options.input)} -> ${resolve(options.outFile)} without React.`);
     return;
   }
@@ -107,7 +115,10 @@ function parseArgs(args: string[]): CliOptions {
     return {
       command,
       input,
-      outFile: valueAfter(args, "--out-file") ?? defaultCompiledOutFile(input)
+      outFile: valueAfter(args, "--out-file") ?? defaultCompiledOutFile(input),
+      tagName: valueAfter(args, "--tag"),
+      component: valueAfter(args, "--component"),
+      definition: valueAfter(args, "--definition")
     };
   }
 
@@ -140,11 +151,33 @@ function parseArgs(args: string[]): CliOptions {
       "Usage:",
       "  react-web-component-bridge generate --input metadata.json --out-dir dist",
       "  react-web-component-bridge compile --input src/card.tsx --out-file dist/card.js",
+      "  react-web-component-bridge compile --input src/card.tsx --tag acme-card --component Card",
+      "  react-web-component-bridge compile --input src/card.tsx --definition card.rwcb.json",
       "  react-web-component-bridge compile-folder --dir src/components --out-dir dist/components",
       "  react-web-component-bridge replace-react-imports --dir src [--dry-run]",
       "  react-web-component-bridge migrate-react-imports src [--dry-run]"
     ].join("\n")
   );
+}
+
+async function compileRegistrations(
+  options: CompileCliOptions
+): Promise<readonly CompileReactRegistration[] | undefined> {
+  const registrations: CompileReactRegistration[] = [];
+  if (options.definition) {
+    const definition = JSON.parse(await readFile(resolve(options.definition), "utf8")) as
+      CompileReactRegistration | CompileReactRegistration[];
+    registrations.push(...(Array.isArray(definition) ? definition : [definition]));
+  }
+
+  if (options.tagName || options.component) {
+    if (!options.tagName || !options.component) {
+      throw new Error("Use --tag and --component together.");
+    }
+    registrations.push({ tagName: options.tagName, component: options.component });
+  }
+
+  return registrations.length > 0 ? registrations : undefined;
 }
 
 function valueAfter(args: readonly string[], flag: string): string | undefined {

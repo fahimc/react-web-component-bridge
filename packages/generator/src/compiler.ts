@@ -7,6 +7,13 @@ export type CompileReactComponentOptions = {
   fileName?: string;
   includeRuntime?: boolean;
   preserveExports?: boolean;
+  registrations?: readonly CompileReactRegistration[] | undefined;
+};
+
+export type CompileReactRegistration = {
+  tagName: string;
+  component: string;
+  options?: Record<string, unknown>;
 };
 
 export type CompileReactComponentResult = {
@@ -18,6 +25,7 @@ export type CompileReactFileOptions = {
   input: string;
   outFile: string;
   includeRuntime?: boolean;
+  registrations?: readonly CompileReactRegistration[] | undefined;
 };
 
 export type CompileReactFolderOptions = {
@@ -45,7 +53,8 @@ export async function compileReactFile(options: CompileReactFileOptions): Promis
   const result = compileReactComponentSource({
     source,
     fileName: options.input,
-    includeRuntime: options.includeRuntime ?? true
+    includeRuntime: options.includeRuntime ?? true,
+    registrations: options.registrations
   });
   if (result.diagnostics.length > 0) {
     throw new Error(
@@ -109,9 +118,10 @@ export function compileReactComponentSource(
   const body = options.preserveExports
     ? transpiled.outputText
     : removeJavaScriptExports(transpiled.outputText);
+  const registrations = createRegistrationStatements(options.registrations ?? []);
 
   return {
-    code: [options.includeRuntime === false ? "" : compiledRuntime(), body]
+    code: [options.includeRuntime === false ? "" : compiledRuntime(), body, registrations]
       .filter(Boolean)
       .join("\n\n"),
     diagnostics
@@ -147,6 +157,23 @@ function removeJavaScriptExports(source: string): string {
     .replace(/\bexport\s+(?=(async\s+)?function\b|class\b|const\b|let\b|var\b)/g, "")
     .replace(/^\s*export\s*\{[^}]*\};?\s*$/gm, "")
     .replace(/^\s*export\s+\{\};?\s*$/gm, "");
+}
+
+function createRegistrationStatements(registrations: readonly CompileReactRegistration[]): string {
+  return registrations
+    .map((registration) => {
+      validateIdentifier(registration.component);
+      return `defineComponentTag(${JSON.stringify(registration.tagName)}, ${
+        registration.component
+      }, ${JSON.stringify(registration.options ?? {})});`;
+    })
+    .join("\n");
+}
+
+function validateIdentifier(value: string): void {
+  if (!/^[$A-Z_a-z][$\w]*(\.[A-Z_a-z_$][$\w]*)*$/.test(value)) {
+    throw new Error(`Invalid component identifier "${value}".`);
+  }
 }
 
 async function* walkCompileFiles(

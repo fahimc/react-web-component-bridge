@@ -6,15 +6,14 @@ The legacy runtime facade can still exist for tests and migration, but the inten
 
 ```text
 React-shaped TSX source
-  import React, { defineComponentTag, useState } from
-  "@fahimc/react-web-component-bridge/react"
+  import React, { useState } from "react"
         |
         v
 No-React compiler
-  - removes React facade imports
+  - removes React imports
   - lowers TSX to h(...) calls
   - replaces supported hooks with a tiny DOM runtime
-  - turns defineComponentTag(...) metadata into CustomElement classes
+  - turns inline or external tag metadata into CustomElement classes
         |
         v
 Vanilla custom-element module
@@ -53,7 +52,7 @@ Source scan
         |
         v
 Import stripping
-  remove react / react-dom / bridge facade imports
+  remove react / react-dom / optional bridge facade imports
         |
         v
 TypeScript TSX lowering
@@ -77,10 +76,12 @@ CLI commands:
 
 ```bash
 react-web-component-bridge compile --input src/customer-picker.tsx --out-file dist/customer-picker.js
+react-web-component-bridge compile --input src/customer-picker.tsx --tag acme-picker --component CustomerPicker
+react-web-component-bridge compile --input src/customer-picker.tsx --definition customer-picker.rwcb.json
 react-web-component-bridge compile-folder --dir src/components --out-dir dist/components
 ```
 
-The existing import migration command is still useful before compilation:
+The existing import migration command is optional. It is only needed when component authors want to add bridge-only helpers directly to source:
 
 ```bash
 react-web-component-bridge replace-react-imports --dir src/components --dry-run

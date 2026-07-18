@@ -63,8 +63,8 @@ const compatibilityItems = [
 ];
 
 const workflowSteps = [
-  "Author React-shaped TSX through the bridge facade import.",
-  "Attach a tag contract with defineComponentTag.",
+  "Author React-shaped TSX with normal React imports.",
+  "Supply a tag contract inline or through external registration metadata.",
   "Run the no-React compiler against one file or a component folder.",
   "The compiler strips React imports, lowers TSX, and injects the small DOM runtime.",
   "The emitted module defines CustomElement classes with props, attributes, slots, events, methods, and styles.",
@@ -73,7 +73,7 @@ const workflowSteps = [
 ];
 
 const architectureLayers = [
-  { label: "React-shaped TSX", detail: "Component code imports authoring APIs from the facade." },
+  { label: "React-shaped TSX", detail: "Component code can keep normal imports from react." },
   { label: "Compiler", detail: "React imports are removed and TSX is lowered to h(...) calls." },
   {
     label: "Tag contract",
@@ -95,7 +95,7 @@ const architectureLayers = [
 ];
 
 const controllerLayers = [
-  "Import stripper: removes react, react-dom, and facade imports",
+  "Import stripper: removes react, react-dom, and optional facade imports",
   "TSX lowering: converts JSX into h(...) calls",
   "Hook cells: useState, useMemo, and useRef without React",
   "Property mapper: attributes and DOM properties into compiled props",
@@ -152,7 +152,7 @@ const apiTranslations = [
 ];
 
 function buildReactSource(heading: string, accent: string, metric: number, compact: boolean) {
-  return `import React, { defineComponentTag, useMemo } from "@fahimc/react-web-component-bridge/react";
+  return `import React, { useMemo } from "react";
 
 type MetricCardProps = {
   heading?: string;
@@ -184,25 +184,27 @@ export function MetricCard({
 }
 
 function buildBridgeSource(tagName: string) {
-  return `// Authoring contract. The compiler turns this into a vanilla Custom Element.
-defineComponentTag("${tagName}", MetricCard, {
-  shadow: { mode: "open" },
-  props: {
-    heading: { type: "string", reflect: true },
-    accent: { type: "string", reflect: true },
-    metric: { type: "number", reflect: true },
-    compact: { type: "boolean", reflect: true }
-  },
-  events: {
-    onAction: {
-      name: "preview-action",
-      detail: (payload) => payload
+  return `{
+  "tagName": "${tagName}",
+  "component": "MetricCard",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "heading": { "type": "string", "reflect": true },
+      "accent": { "type": "string", "reflect": true },
+      "metric": { "type": "number", "reflect": true },
+      "compact": { "type": "boolean", "reflect": true }
+    },
+    "events": {
+      "onAction": { "name": "preview-action" }
     }
   }
-});
+}
 
-// Build command:
-// react-web-component-bridge compile --input metric-card.tsx --out-file metric-card.web-components.js`;
+react-web-component-bridge compile \\
+  --input metric-card.tsx \\
+  --out-file metric-card.web-components.js \\
+  --definition metric-card.rwcb.json`;
 }
 
 function buildHtmlUsage(
@@ -324,9 +326,9 @@ function App() {
           <p className="eyebrow">React-shaped TSX to no-React browser tags</p>
           <h1>Keep React authoring. Ship Web Components without React.</h1>
           <p className="lede">
-            Import authoring APIs from the bridge facade, define a custom-element tag, and compile
-            the result into browser-native JavaScript that Angular, plain HTML, Vue, or any
-            standards-based host can consume without React in the production bundle.
+            Keep normal React imports, provide a Web Component tag contract, and compile the result
+            into browser-native JavaScript that Angular, plain HTML, Vue, or any standards-based
+            host can consume without React in the production bundle.
           </p>
           <div className="hero-actions">
             <a className="button primary" href="#editor">
@@ -371,7 +373,7 @@ function App() {
           <section className="editor-pane" aria-label="React component editor">
             <div className="pane-header">
               <span>React-shaped component</span>
-              <span>@fahimc/react-web-component-bridge/react</span>
+              <span>react</span>
             </div>
             <textarea
               aria-label="React source editor"
@@ -463,20 +465,20 @@ function App() {
           <article>
             <h3>What it is</h3>
             <p>
-              A compiler and tiny DOM runtime that turns React-shaped TSX component definitions into
-              browser Custom Elements. Angular users import the compiled output without installing
-              React.
+              A compiler and tiny DOM runtime that turns existing React-shaped TSX component
+              definitions into browser Custom Elements. Angular users import the compiled output
+              without installing React.
             </p>
           </article>
           <article>
             <h3>Authoring API</h3>
             <pre>
-              <code>{`import React, { defineComponentTag } from "@fahimc/react-web-component-bridge/react";
+              <code>{`import React, { useState } from "react";
 
-defineComponentTag("acme-customer-card", CustomerCard, {
-  props: { customer: { attribute: false } },
-  events: { onSelect: { name: "customer-select" } }
-});`}</code>
+export function CustomerCard({ customer, onSelect }) {
+  const [selected, setSelected] = useState(false);
+  return <button onClick={() => onSelect?.(customer)}>{customer.name}</button>;
+}`}</code>
             </pre>
           </article>
           <article>
@@ -498,20 +500,22 @@ defineComponentTag("acme-customer-card", CustomerCard, {
           <article>
             <h3>No-React compile</h3>
             <p>
-              Compile one component file or a folder of TSX files. The emitted browser module has no{" "}
+              Compile one component file or a folder of TSX files. Existing imports from{" "}
+              <code>react</code> can stay unchanged. The emitted browser module has no{" "}
               <code>react</code>, <code>react-dom</code>, JSX runtime import, or{" "}
               <code>createRoot</code>.
             </p>
             <pre>
-              <code>{`react-web-component-bridge compile --input src/card.tsx --out-file dist/card.js
+              <code>{`react-web-component-bridge compile --input src/card.tsx --tag acme-card --component Card
+react-web-component-bridge compile --input src/card.tsx --definition card.rwcb.json
 react-web-component-bridge compile-folder --dir src/components --out-dir dist/components`}</code>
             </pre>
           </article>
           <article>
             <h3>Import replacement</h3>
             <p>
-              Run the generator CLI against a folder to rewrite exact <code>react</code> imports to
-              the bridge facade. Use <code>--dry-run</code> first to review changed files.
+              Import replacement is optional. Run it only when component authors want bridge-only
+              helpers inline in source. Use <code>--dry-run</code> first to review changed files.
             </p>
             <pre>
               <code>{`react-web-component-bridge replace-react-imports --dir src/components --dry-run

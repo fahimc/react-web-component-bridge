@@ -1,15 +1,43 @@
 # API Design
 
-The primary API is a React-compatible facade:
+The compiler path is designed so existing React component source can keep normal React imports:
 
 ```tsx
-import React, {
-  defineComponentTag,
-  useEffect,
-  useState
-} from "@fahimc/react-web-component-bridge/react";
+import React, { useState } from "react";
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
 ```
 
-This keeps component source close to ordinary React code while adding tag registration beside the component export. Under the hood, `defineComponentTag` delegates to the lower-level `defineReactElement` runtime and supplies the same definition model for props, attributes, events, slots, methods, form behavior, styles, wrappers, and portals.
+The Web Component tag contract can be supplied outside the component source:
 
-The lower-level runtime APIs remain public for teams that prefer explicit bridge calls or generated metadata. The facade is the recommended authoring path because it makes the package behave like a drop-in React import plus a Web Component tag definition API.
+```bash
+react-web-component-bridge compile --input src/Counter.tsx --tag acme-counter --component Counter
+```
+
+For richer contracts, use a JSON definition:
+
+```json
+{
+  "tagName": "acme-counter",
+  "component": "Counter",
+  "options": {
+    "props": {
+      "label": { "type": "string", "default": "Count" }
+    },
+    "events": {
+      "onChange": { "name": "change" }
+    }
+  }
+}
+```
+
+Inline registration is still available when authors own the source and want the tag definition colocated:
+
+```tsx
+import React, { defineComponentTag, useState } from "@fahimc/react-web-component-bridge/react";
+```
+
+Both paths compile to browser-native Custom Elements with no React runtime in the emitted bundle.
