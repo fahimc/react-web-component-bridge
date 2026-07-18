@@ -11,5 +11,6 @@ tests/package/fixture-app-*/
 .angular/
 .vite/
 .netlify/
+.codex-tools/
 .env
 .DS_Store
