@@ -318,6 +318,13 @@ function App() {
           <a href="#docs">Docs</a>
           <a href="#support">Support</a>
           <a href="#architecture">Architecture</a>
+          <a
+            href="https://github.com/fahimc/react-web-component-bridge"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
         </div>
       </nav>
 
