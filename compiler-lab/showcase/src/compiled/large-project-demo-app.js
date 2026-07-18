@@ -465,65 +465,92 @@ function toKebab(value) {
   return value.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()).replace(/^-/, "");
 }
 
-const variants = {
-    default: "variant-default",
-    destructive: "variant-destructive",
-    outline: "variant-outline",
-    secondary: "variant-secondary"
-};
-function cn(...items) {
-    return items.filter(Boolean).join(" ");
+const friends = [
+    {
+        city: "Budapest",
+        firstName: "Igor",
+        id: 1,
+        image: "IM",
+        lastName: "Mucsicska",
+        status: "Online"
+    },
+    { city: "London", firstName: "Maya", id: 2, image: "MR", lastName: "Reed", status: "Away" },
+    { city: "Berlin", firstName: "Jonas", id: 3, image: "JK", lastName: "Keller", status: "Online" },
+    {
+        city: "Lisbon",
+        firstName: "Sofia",
+        id: 4,
+        image: "SA",
+        lastName: "Almeida",
+        status: "Offline"
+    },
+    { city: "Prague", firstName: "Tomas", id: 5, image: "TN", lastName: "Novak", status: "Online" }
+];
+function reducer(state, action) {
+    if (action.type === "search")
+        return { ...state, searchText: action.text };
+    if (action.type === "clear")
+        return { ...state, notifications: [] };
+    const exists = state.favorites.includes(action.friend.id);
+    return {
+        ...state,
+        favorites: exists
+            ? state.favorites.filter((id) => id !== action.friend.id)
+            : [...state.favorites, action.friend.id],
+        notifications: [
+            `${action.friend.firstName} ${exists ? "removed from" : "added to"} favorites`,
+            ...state.notifications
+        ].slice(0, 3)
+    };
 }
-function Button(props) {
-    const className = useMemo(() => cn("ui-button", variants[props.variant ?? "default"], `size-${props.size ?? "md"}`), [props.size, props.variant]);
-    return (h("button", { className: className, disabled: props.disabled, onClick: props.onClick, type: "button" }, props.children));
-}
-function Badge(props) {
-    return h("span", { className: cn("kit-badge", `tone-${props.tone ?? "green"}`) }, props.children);
-}
-function Card(props) {
-    return (h("article", { className: "kit-card" },
-        h("h3", null, props.title),
-        h("div", null, props.children)));
-}
-function ShadcnKit(props) {
-    const [density, setDensity] = useState("Comfortable");
-    const [active, setActive] = useState("Components");
-    return (h("section", { className: "kit-app" },
-        h("header", { className: "kit-hero" },
+function LargeProjectDemoApp() {
+    const [state, dispatch] = useReducer(reducer, {
+        favorites: [1, 3],
+        notifications: [],
+        searchText: ""
+    });
+    const [pageSize, setPageSize] = useState(3);
+    const visible = useMemo(() => friends
+        .filter((friend) => `${friend.firstName} ${friend.lastName} ${friend.city}`
+        .toLowerCase()
+        .includes(state.searchText.toLowerCase()))
+        .slice(0, pageSize), [pageSize, state.searchText]);
+    return (h("section", { className: "large-app" },
+        h("header", { className: "large-hero" },
             h("div", null,
-                h("p", { className: "origin" }, "shadcn/ui component-library pattern"),
-                h("h2", null, "Design system workbench compiled to Web Components"),
-                h("span", null, "Buttons, badges, cards, tabs, forms, and table rows are authored as React component-library primitives.")),
-            h(Button, { onClick: () => props.onAction?.({ name: "Publish theme" }) }, "Publish theme")),
-        h("nav", { className: "kit-tabs" }, ["Components", "Tokens", "Preview"].map((tab) => (h("button", { className: active === tab ? "active" : "", onClick: () => setActive(tab) }, tab)))),
-        h("main", { className: "kit-grid" },
-            h(Card, { title: "Button variants" },
-                h("div", { className: "button-stack" },
-                    h(Button, null, "Primary"),
-                    h(Button, { variant: "secondary" }, "Secondary"),
-                    h(Button, { variant: "outline" }, "Outline"),
-                    h(Button, { variant: "destructive" }, "Delete"))),
-            h(Card, { title: "Release status" },
-                h("div", { className: "badge-row" },
-                    h(Badge, null, "Compiled"),
-                    h(Badge, { tone: "amber" }, "Review"),
-                    h(Badge, { tone: "red" }, "Blocked"))),
-            h(Card, { title: "Form controls" },
+                h("p", { className: "origin" }, "react-large-project-demo / packages/app"),
+                h("h2", null, "Friends workspace compiled from a large-project app pattern"),
+                h("span", null, "Feature package boundaries, reducer-style state, search, notifications, and load-more behavior are represented in one compiled custom element.")),
+            h("strong", null,
+                state.favorites.length,
+                " favorites")),
+        h("main", { className: "large-layout" },
+            h("section", { className: "large-panel" },
                 h("label", null,
-                    "Density",
-                    h("select", { value: density, onChange: (event) => setDensity(event.currentTarget.value) },
-                        h("option", null, "Comfortable"),
-                        h("option", null, "Compact"))),
-                h("p", null,
-                    density,
-                    " layout selected for host applications.")),
-            h(Card, { title: "Component table" },
-                h("div", { className: "kit-table" }, ["Button", "Badge", "Card", "Select"].map((name) => (h("div", null,
-                    h("strong", null, name),
-                    h("span", null, "ready"),
-                    h(Button, { size: "sm", variant: "outline", onClick: () => props.onAction?.({ name }) }, "Inspect")))))))));
+                    "Search friends",
+                    h("input", { value: state.searchText, placeholder: "Type a name or city", onInput: (event) => dispatch({ type: "search", text: event.currentTarget.value }) })),
+                h("div", { className: "friend-list" }, visible.map((friend) => {
+                    const favorite = state.favorites.includes(friend.id);
+                    return (h("article", { className: "friend-card" },
+                        h("span", { className: "avatar" }, friend.image),
+                        h("div", null,
+                            h("strong", null,
+                                friend.firstName,
+                                " ",
+                                friend.lastName),
+                            h("small", null,
+                                friend.city,
+                                " / ",
+                                friend.status)),
+                        h("button", { onClick: () => dispatch({ type: "favorite", friend }) }, favorite ? "Remove favorite" : "Add favorite")));
+                })),
+                pageSize < friends.length ? (h("button", { className: "load-more", onClick: () => setPageSize(pageSize + 2) }, "Load more friends")) : null),
+            h("aside", { className: "large-panel" },
+                h("strong", null, "Mock API activity"),
+                h("p", null, "Local state mirrors the repo's friends package flow: fetch result, reducer actions, and notification feedback."),
+                h("div", { className: "notification-list" }, state.notifications.length ? (state.notifications.map((message) => h("span", null, message))) : (h("span", null, "No notifications yet"))),
+                h("button", { className: "secondary-action", onClick: () => dispatch({ type: "clear" }) }, "Clear notifications")))));
 }
 
 
-defineComponentTag("lab-shadcn-kit", ShadcnKit, {"shadow":{"mode":"open"},"events":{"onAction":{"name":"action"}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  button,input,select,textarea{font:inherit}\n  button{border:0}\n  .rw-app,.bp-app,.jira-app,.kit-app{display:grid;gap:18px;min-width:0}\n  .rw-hero{display:grid;gap:28px;border-radius:10px;background:#0f8f68;color:white;padding:22px}\n  .rw-hero nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}\n  .rw-hero nav strong{font-size:24px}\n  .rw-hero h2,.bp-header h2,.jira-header h2,.kit-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .rw-hero p{max-width:760px;line-height:1.6}\n  .rw-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}\n  .rw-feed,.rw-editor{display:grid;align-content:start;gap:14px}\n  .rw-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #d8e0e7;padding-bottom:10px}\n  .rw-tabs button,.bp-filter button,.kit-tabs button{border-radius:6px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .rw-tabs button.active,.bp-filter button.active,.kit-tabs button.active{background:#0f8f68;color:white}\n  .rw-article,.rw-editor,.bp-metrics article,.bp-table article,.kit-card{border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:14px}\n  .rw-article{display:grid;gap:10px}\n  .rw-article div,.rw-article footer,.bp-header,.jira-header,.kit-hero{display:flex;align-items:center;justify-content:space-between;gap:12px}\n  .rw-article div{align-items:flex-start}\n  .rw-article div span,.rw-article p,.rw-editor p,.bp-header span,.kit-hero span{color:#566273}\n  .rw-article footer{flex-wrap:wrap}\n  .rw-article footer button,.bp-header button,.bp-table button,.jira-header button{border-radius:6px;background:#111827;color:#fff;padding:9px 12px;cursor:pointer}\n  .rw-editor textarea{min-height:160px;resize:vertical;border:1px solid #cbd5df;border-radius:8px;padding:12px}\n  .bp-app{grid-template-columns:220px minmax(0,1fr)}\n  .bp-sidebar,.jira-left{display:grid;align-content:start;gap:13px;border-radius:10px;background:#102033;color:white;padding:18px}\n  .bp-sidebar strong,.jira-left strong{font-size:19px}\n  .bp-sidebar span,.jira-left span{color:#d6dee8}\n  .bp-app main,.jira-app main{display:grid;gap:16px;min-width:0}\n  .bp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .bp-metrics article{display:grid;gap:4px}\n  .bp-metrics strong{font-size:28px}\n  .bp-metrics span,.bp-table span{color:#566273}\n  .bp-filter{display:flex;gap:8px;flex-wrap:wrap}\n  .bp-table{display:grid;gap:10px}\n  .bp-table article{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px auto;align-items:center;gap:12px}\n  .bp-table article div{display:grid;gap:4px}\n  .bp-table code,.jira-column header span,.kit-badge{width:max-content;border-radius:999px;background:#eef3f7;padding:5px 8px;color:#526070}\n  .jira-app{grid-template-columns:190px minmax(0,1fr) 260px}\n  .jira-controls{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px}\n  .jira-controls input,.jira-controls select,.kit-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .jira-columns{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}\n  .jira-column{display:grid;align-content:start;gap:10px;border-radius:10px;background:#eef3f7;padding:12px;min-height:430px}\n  .jira-column header{display:flex;align-items:center;justify-content:space-between}\n  .jira-card{display:grid;gap:7px;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;text-align:left;cursor:pointer}\n  .jira-card.selected{border-color:#0f8f68;box-shadow:0 0 0 2px rgba(15,143,104,.12)}\n  .jira-card span,.jira-card small{color:#566273}\n  .jira-detail{display:grid;align-content:start;gap:10px;border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .jira-detail h3{margin:0;font-size:26px}\n  .jira-detail dl{display:grid;gap:10px;margin:0}\n  .jira-detail div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px}\n  .jira-detail dt{color:#566273}\n  .jira-detail dd{margin:0;font-weight:700}\n  .kit-hero{align-items:flex-start;border-bottom:1px solid #d8e0e7;padding-bottom:16px}\n  .kit-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .kit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .kit-card{display:grid;gap:12px}\n  .kit-card h3{margin:0;font-size:18px}\n  .kit-card label{display:grid;gap:7px;color:#566273}\n  .kit-card p{color:#566273}\n  .kit-table{display:grid;gap:8px}\n  .kit-table div{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .badge-row{display:flex;gap:8px;flex-wrap:wrap}\n  .tone-green{background:#e5f7ef;color:#0f684f}\n  .tone-amber{background:#fff3cc;color:#7c5700}\n  .tone-red{background:#ffe2e0;color:#8a1f17}\n  .variant-destructive{background:#b42318;color:#fff}\n  .variant-destructive:hover:not(:disabled){background:#921b13}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n  @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}\n"});
+defineComponentTag("lab-large-project-app", LargeProjectDemoApp, {"shadow":{"mode":"open"},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  button,input,select,textarea{font:inherit}\n  button{border:0}\n  .rw-app,.bp-app,.jira-app,.kit-app{display:grid;gap:18px;min-width:0}\n  .rw-hero{display:grid;gap:28px;border-radius:10px;background:#0f8f68;color:white;padding:22px}\n  .rw-hero nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}\n  .rw-hero nav strong{font-size:24px}\n  .rw-hero h2,.bp-header h2,.jira-header h2,.kit-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .rw-hero p{max-width:760px;line-height:1.6}\n  .rw-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}\n  .rw-feed,.rw-editor{display:grid;align-content:start;gap:14px}\n  .rw-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #d8e0e7;padding-bottom:10px}\n  .rw-tabs button,.bp-filter button,.kit-tabs button{border-radius:6px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .rw-tabs button.active,.bp-filter button.active,.kit-tabs button.active{background:#0f8f68;color:white}\n  .rw-article,.rw-editor,.bp-metrics article,.bp-table article,.kit-card{border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:14px}\n  .rw-article{display:grid;gap:10px}\n  .rw-article div,.rw-article footer,.bp-header,.jira-header,.kit-hero{display:flex;align-items:center;justify-content:space-between;gap:12px}\n  .rw-article div{align-items:flex-start}\n  .rw-article div span,.rw-article p,.rw-editor p,.bp-header span,.kit-hero span{color:#566273}\n  .rw-article footer{flex-wrap:wrap}\n  .rw-article footer button,.bp-header button,.bp-table button,.jira-header button{border-radius:6px;background:#111827;color:#fff;padding:9px 12px;cursor:pointer}\n  .rw-editor textarea{min-height:160px;resize:vertical;border:1px solid #cbd5df;border-radius:8px;padding:12px}\n  .bp-app{grid-template-columns:220px minmax(0,1fr)}\n  .bp-sidebar,.jira-left{display:grid;align-content:start;gap:13px;border-radius:10px;background:#102033;color:white;padding:18px}\n  .bp-sidebar strong,.jira-left strong{font-size:19px}\n  .bp-sidebar span,.jira-left span{color:#d6dee8}\n  .bp-app main,.jira-app main{display:grid;gap:16px;min-width:0}\n  .bp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .bp-metrics article{display:grid;gap:4px}\n  .bp-metrics strong{font-size:28px}\n  .bp-metrics span,.bp-table span{color:#566273}\n  .bp-filter{display:flex;gap:8px;flex-wrap:wrap}\n  .bp-table{display:grid;gap:10px}\n  .bp-table article{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px auto;align-items:center;gap:12px}\n  .bp-table article div{display:grid;gap:4px}\n  .bp-table code,.jira-column header span,.kit-badge{width:max-content;border-radius:999px;background:#eef3f7;padding:5px 8px;color:#526070}\n  .jira-app{grid-template-columns:190px minmax(0,1fr) 260px}\n  .jira-controls{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px}\n  .jira-controls input,.jira-controls select,.kit-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .jira-columns{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}\n  .jira-column{display:grid;align-content:start;gap:10px;border-radius:10px;background:#eef3f7;padding:12px;min-height:430px}\n  .jira-column header{display:flex;align-items:center;justify-content:space-between}\n  .jira-card{display:grid;gap:7px;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;text-align:left;cursor:pointer}\n  .jira-card.selected{border-color:#0f8f68;box-shadow:0 0 0 2px rgba(15,143,104,.12)}\n  .jira-card span,.jira-card small{color:#566273}\n  .jira-detail{display:grid;align-content:start;gap:10px;border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .jira-detail h3{margin:0;font-size:26px}\n  .jira-detail dl{display:grid;gap:10px;margin:0}\n  .jira-detail div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px}\n  .jira-detail dt{color:#566273}\n  .jira-detail dd{margin:0;font-weight:700}\n  .kit-hero{align-items:flex-start;border-bottom:1px solid #d8e0e7;padding-bottom:16px}\n  .kit-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .kit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .kit-card{display:grid;gap:12px}\n  .kit-card h3{margin:0;font-size:18px}\n  .kit-card label{display:grid;gap:7px;color:#566273}\n  .kit-card p{color:#566273}\n  .kit-table{display:grid;gap:8px}\n  .kit-table div{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .badge-row{display:flex;gap:8px;flex-wrap:wrap}\n  .tone-green{background:#e5f7ef;color:#0f684f}\n  .tone-amber{background:#fff3cc;color:#7c5700}\n  .tone-red{background:#ffe2e0;color:#8a1f17}\n  .variant-destructive{background:#b42318;color:#fff}\n  .variant-destructive:hover:not(:disabled){background:#921b13}\n  .large-app,.chakra-app{display:grid;gap:18px;min-width:0}\n  .large-hero,.chakra-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-radius:12px;background:#102033;color:white;padding:22px}\n  .large-hero h2,.chakra-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .large-hero span,.chakra-hero span{display:block;max-width:760px;color:#d6dee8;line-height:1.6}\n  .large-hero strong{border-radius:999px;background:#0f8f68;padding:9px 12px;white-space:nowrap}\n  .large-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}\n  .large-panel,.chakra-card,.chakra-stat{border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .large-panel{display:grid;align-content:start;gap:14px}\n  .large-panel label,.chakra-card label{display:grid;gap:7px;color:#566273;font-weight:700}\n  .large-panel input,.chakra-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .friend-list{display:grid;gap:10px}\n  .friend-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #e5ebf0;border-radius:10px;background:#f8fafc;padding:12px}\n  .avatar{display:grid;place-items:center;width:42px;height:42px;border-radius:999px;background:#0f8f68;color:white;font-weight:800}\n  .friend-card div{display:grid;gap:3px}\n  .friend-card small,.large-panel p{color:#566273}\n  .friend-card button,.load-more,.secondary-action,.chakra-button{border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:750}\n  .friend-card button,.load-more,.chakra-solid{background:#111827;color:white}\n  .secondary-action,.chakra-outline{border:1px solid #cbd5df;background:#fff;color:#162033}\n  .notification-list{display:grid;gap:8px}\n  .notification-list span{border-radius:8px;background:#e5f7ef;color:#0f684f;padding:9px 10px}\n  .chakra-app{border-radius:12px}\n  .chakra-app.dark{background:#0b1220;color:#e9eef5}\n  .chakra-hero{background:linear-gradient(135deg,#102033,#0f684f)}\n  .chakra-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .chakra-tabs button{border-radius:8px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .chakra-tabs button.active{background:#0f8f68;color:white}\n  .chakra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .chakra-card{display:grid;gap:12px}\n  .chakra-card h3{margin:0;font-size:18px}\n  .chakra-actions{display:flex;gap:10px;flex-wrap:wrap}\n  .chakra-subtle{background:#e5f7ef;color:#0f684f}\n  .chakra-sm{padding:7px 10px;font-size:13px}\n  .chakra-md{padding:9px 12px}\n  .chakra-lg{padding:12px 16px;font-size:16px}\n  .accent-blue.chakra-solid{background:#1d4ed8}\n  .accent-purple.chakra-solid{background:#7c3aed}\n  .chakra-table{display:grid;gap:8px}\n  .chakra-table div{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .chakra-table span{color:#566273}\n  .chakra-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .chakra-stat{display:grid;gap:4px}\n  .chakra-stat strong{font-size:28px}\n  .chakra-stat span{color:#566273}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n  @media(max-width:980px){.large-layout,.chakra-grid,.chakra-stats{grid-template-columns:1fr}.large-hero,.chakra-hero{flex-direction:column}.friend-card{grid-template-columns:1fr}.chakra-table div{grid-template-columns:1fr}}\n  @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}\n"});

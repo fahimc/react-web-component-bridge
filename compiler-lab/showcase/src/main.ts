@@ -1,11 +1,10 @@
-import "./compiled/realworld-app.js";
-import "./compiled/bulletproof-app.js";
+import "./compiled/large-project-demo-app.js";
 import "./compiled/jira-app.js";
-import "./compiled/shadcn-kit.js";
+import "./compiled/chakra-ui-app.js";
 import "./styles.css";
 
 type LabElement = HTMLElement & Record<string, unknown>;
-type DemoId = "realworld" | "bulletproof" | "jira" | "shadcn";
+type DemoId = "large-project" | "jira" | "chakra";
 
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) {
@@ -21,46 +20,37 @@ const demos: Array<{
   source: string;
 }> = [
   {
-    id: "realworld",
-    title: "RealWorld React Redux",
-    eyebrow: "Article app demo",
+    id: "large-project",
+    title: "react-large-project-demo",
+    eyebrow: "Large React app demo",
     description:
-      "A full article/feed app built from RealWorld React Redux patterns, compiled from React-shaped source into one custom element.",
-    tag: "lab-realworld-app",
-    source: "gothinkster/react-redux-realworld-example-app"
-  },
-  {
-    id: "bulletproof",
-    title: "Bulletproof React",
-    eyebrow: "SaaS dashboard demo",
-    description:
-      "A dashboard-style page using Bulletproof React auth and permission patterns, compiled as a native custom element.",
-    tag: "lab-bulletproof-app",
-    source: "alan2207/bulletproof-react"
+      "Compiled from a React-shaped fixture based on packages/app and packages/friends: feature boundaries, friend search, reducer state, notifications, favorites, and load-more behavior.",
+    tag: "lab-large-project-app",
+    source: "mucsi96/react-large-project-demo"
   },
   {
     id: "jira",
-    title: "Jira Clone",
-    eyebrow: "Kanban workflow demo",
+    title: "jira_clone",
+    eyebrow: "Jira app demo",
     description:
-      "A full board page based on Jira Clone board, filter, and issue-card patterns with CustomEvent output to the host page.",
+      "Compiled from a React-shaped fixture based on the client Project/Board app: sidebar, filters, Kanban columns, issue cards, detail panel, and issue-open events.",
     tag: "lab-jira-app",
     source: "oldboyxx/jira_clone"
   },
   {
-    id: "shadcn",
-    title: "shadcn/ui",
+    id: "chakra",
+    title: "chakra-ui",
     eyebrow: "Component library demo",
     description:
-      "A component-library workbench based on shadcn/ui variant patterns, compiled into one reusable design-system custom element.",
-    tag: "lab-shadcn-kit",
-    source: "shadcn-ui/ui"
+      "Compiled from a React-shaped fixture based on apps/www, apps/compositions, and packages/react: theme context, recipes, tabs, cards, stats, and composed button primitives.",
+    tag: "lab-chakra-ui-app",
+    source: "chakra-ui/chakra-ui"
   }
 ];
 
 const routeFromHash = (): DemoId | "home" => {
   const route = window.location.hash.replace(/^#\/?/, "");
-  if (route === "realworld" || route === "bulletproof" || route === "jira" || route === "shadcn") {
+  if (route === "large-project" || route === "jira" || route === "chakra") {
     return route;
   }
   return "home";
@@ -80,10 +70,10 @@ const renderHome = () => {
     <main class="shell">
       <header class="page-header landing-header">
         <p>Compiler Lab</p>
-        <h1>No-React Web Component demo pages</h1>
-        <span>Open a full demo page for each cloned React app pattern or the cloned component-library test. The landing page stays clean and links into the demos.</span>
+        <h1>Compiled full-app demo pages</h1>
+        <span>Each link opens a separate page running a generated Web Component bundle from our compiler. The landing page only links to the compiled demos.</span>
       </header>
-      <section class="demo-grid" aria-label="Compiled demo pages">
+      <section class="demo-grid three-up" aria-label="Compiled demo pages">
         ${demos
           .map(
             (demo) => `
@@ -96,30 +86,6 @@ const renderHome = () => {
             `
           )
           .join("")}
-      </section>
-      <section class="link-band" aria-labelledby="known-apps">
-        <div>
-          <p>Recognizable React targets</p>
-          <h2 id="known-apps">External apps to evaluate as larger compiler targets</h2>
-        </div>
-        <div class="app-links">
-          <a href="https://excalidraw.com" target="_blank" rel="noreferrer">
-            <strong>Excalidraw</strong>
-            <span>whiteboard app</span>
-          </a>
-          <a href="https://cal.com" target="_blank" rel="noreferrer">
-            <strong>Cal.com</strong>
-            <span>scheduling app</span>
-          </a>
-          <a href="https://storybook.js.org" target="_blank" rel="noreferrer">
-            <strong>Storybook</strong>
-            <span>component workshop</span>
-          </a>
-          <a href="https://appsmith.com" target="_blank" rel="noreferrer">
-            <strong>Appsmith</strong>
-            <span>internal tools builder</span>
-          </a>
-        </div>
       </section>
     </main>
   `;
@@ -151,18 +117,10 @@ const renderDemo = (id: DemoId) => {
 };
 
 const renderDemoBody = (id: DemoId) => {
-  if (id === "realworld") {
+  if (id === "large-project") {
     return `
-      <section class="app-frame realworld-page">
-        <lab-realworld-app></lab-realworld-app>
-      </section>
-    `;
-  }
-
-  if (id === "bulletproof") {
-    return `
-      <section class="app-frame dashboard-page">
-        <lab-bulletproof-app></lab-bulletproof-app>
+      <section class="app-frame large-project-page">
+        <lab-large-project-app></lab-large-project-app>
       </section>
     `;
   }
@@ -178,20 +136,13 @@ const renderDemoBody = (id: DemoId) => {
 
   return `
     <section class="app-frame component-page">
-      <lab-shadcn-kit></lab-shadcn-kit>
-      <p class="button-log" aria-live="polite">Button event: none</p>
+      <lab-chakra-ui-app></lab-chakra-ui-app>
+      <p class="button-log" aria-live="polite">Component event: none</p>
     </section>
   `;
 };
 
 const bindDemo = (id: DemoId) => {
-  if (id === "bulletproof") {
-    const dashboard = document.querySelector<LabElement>("lab-bulletproof-app");
-    if (dashboard) {
-      dashboard.user = { firstName: "Katherine", lastName: "Johnson", role: "ADMIN" };
-    }
-  }
-
   if (id === "jira") {
     const board = document.querySelector<LabElement>("lab-jira-app");
     const log = document.querySelector<HTMLElement>(".event-log");
@@ -203,8 +154,8 @@ const bindDemo = (id: DemoId) => {
     }
   }
 
-  if (id === "shadcn") {
-    const kit = document.querySelector<LabElement>("lab-shadcn-kit");
+  if (id === "chakra") {
+    const kit = document.querySelector<LabElement>("lab-chakra-ui-app");
     const buttonLog = document.querySelector<HTMLElement>(".button-log");
     kit?.addEventListener("action", (event) => {
       const detail = (event as CustomEvent<{ name?: string }>).detail;

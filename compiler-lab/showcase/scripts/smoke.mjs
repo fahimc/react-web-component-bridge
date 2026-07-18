@@ -28,42 +28,36 @@ try {
   });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("http://127.0.0.1:4188", { waitUntil: "networkidle" });
-  await page.waitForSelector(".demo-card[data-demo='realworld']");
+  await page.waitForSelector(".demo-card[data-demo='large-project']");
   const landingMetrics = await page.evaluate(() => ({
     demoCards: document.querySelectorAll(".demo-card").length,
-    renderedDemos: document.querySelectorAll(
-      "lab-realworld-app,lab-bulletproof-app,lab-jira-app,lab-shadcn-kit"
-    ).length
+    renderedDemos: document.querySelectorAll("lab-large-project-app,lab-jira-app,lab-chakra-ui-app")
+      .length
   }));
-  if (landingMetrics.demoCards !== 4) throw new Error("Landing page demo links missing");
+  if (landingMetrics.demoCards !== 3) throw new Error("Landing page demo links missing");
   if (landingMetrics.renderedDemos !== 0) throw new Error("Landing page should link to demos only");
 
-  await page.goto("http://127.0.0.1:4188/#/realworld", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-realworld-app");
-  await page.waitForFunction(() =>
-    document.querySelector("lab-realworld-app")?.shadowRoot?.textContent?.includes("Global Feed")
-  );
-  await page.goto("http://127.0.0.1:4188/#/bulletproof", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-bulletproof-app");
+  await page.goto("http://127.0.0.1:4188/#/large-project", { waitUntil: "networkidle" });
+  await page.waitForSelector("lab-large-project-app");
   await page.waitForFunction(() =>
     document
-      .querySelector("lab-bulletproof-app")
-      ?.shadowRoot?.textContent?.includes("Katherine Johnson")
+      .querySelector("lab-large-project-app")
+      ?.shadowRoot?.textContent?.includes("Friends workspace")
   );
-  await page.goto("http://127.0.0.1:4188/#/shadcn", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-shadcn-kit");
+  await page.goto("http://127.0.0.1:4188/#/chakra", { waitUntil: "networkidle" });
+  await page.waitForSelector("lab-chakra-ui-app");
   await page.waitForFunction(() =>
     document
-      .querySelector("lab-shadcn-kit")
-      ?.shadowRoot?.textContent?.includes("Design system workbench")
+      .querySelector("lab-chakra-ui-app")
+      ?.shadowRoot?.textContent?.includes("Chakra UI system console")
   );
-  await page.locator("lab-shadcn-kit").evaluate((element) => {
+  await page.locator("lab-chakra-ui-app").evaluate((element) => {
     const button = element.shadowRoot?.querySelector("button");
-    if (!button) throw new Error("shadcn kit action not rendered");
+    if (!button) throw new Error("Chakra action not rendered");
     button.click();
   });
   await page.waitForFunction(() =>
-    document.querySelector(".button-log")?.textContent?.includes("Publish theme")
+    document.querySelector(".button-log")?.textContent?.includes("Publish Chakra theme")
   );
   await page.goto("http://127.0.0.1:4188/#/jira", { waitUntil: "networkidle" });
   await page.waitForSelector("lab-jira-app");

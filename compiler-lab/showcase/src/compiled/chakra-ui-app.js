@@ -465,79 +465,70 @@ function toKebab(value) {
   return value.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()).replace(/^-/, "");
 }
 
-const articles = [
-    {
-        author: "Ada Lovelace",
-        body: "A React-authored article card compiled into a browser custom element without shipping React.",
-        favorites: 128,
-        tag: "compiler",
-        title: "Shipping React components as native tags"
-    },
-    {
-        author: "Grace Hopper",
-        body: "Angular consumes the generated bundle as plain custom elements and receives DOM events.",
-        favorites: 86,
-        tag: "angular",
-        title: "Using compiled widgets inside Angular"
-    },
-    {
-        author: "Linus Torvalds",
-        body: "The production output is scanned for React import and root-render markers on every lab smoke run.",
-        favorites: 64,
-        tag: "performance",
-        title: "Keeping the runtime small"
-    }
-];
-function reducer(state, action) {
-    if (action.type === "tag") {
-        return { ...state, activeTag: action.tag };
-    }
-    const exists = state.favorited.includes(action.title);
-    return {
-        ...state,
-        favorited: exists
-            ? state.favorited.filter((item) => item !== action.title)
-            : [...state.favorited, action.title]
-    };
+const ThemeContext = createContext({
+    accent: "teal",
+    mode: "Light"
+});
+function cx(...items) {
+    return items.filter(Boolean).join(" ");
 }
-function RealWorldApp() {
-    const [state, dispatch] = useReducer(reducer, { activeTag: "all", favorited: [] });
-    const [draft, setDraft] = useState("React stays in source. The compiled tag runs anywhere.");
-    const filtered = useMemo(() => articles.filter((article) => state.activeTag === "all" || article.tag === state.activeTag), [state.activeTag]);
-    return (h("section", { className: "rw-app" },
-        h("header", { className: "rw-hero" },
-            h("nav", null,
-                h("strong", null, "conduit"),
-                h("span", null, "Home"),
-                h("span", null, "New Article"),
-                h("span", null, "Settings")),
-            h("div", null,
-                h("p", { className: "origin" }, "RealWorld React Redux app pattern"),
-                h("h2", null, "A full feed app compiled into one Web Component"),
-                h("p", null, "Article lists, filters, stateful favorites, and an editor preview are authored as React and emitted as a custom element."))),
-        h("main", { className: "rw-layout" },
-            h("section", { className: "rw-feed" },
-                h("div", { className: "rw-tabs" }, ["all", "compiler", "angular", "html", "performance"].map((tag) => (h("button", { className: state.activeTag === tag ? "active" : "", onClick: () => dispatch({ type: "tag", tag }) }, tag === "all" ? "Global Feed" : tag)))),
-                filtered.map((article) => {
-                    const liked = state.favorited.includes(article.title);
-                    return (h("article", { className: "rw-article" },
-                        h("div", null,
-                            h("strong", null, article.title),
-                            h("span", null, article.author)),
-                        h("p", null, article.body),
-                        h("footer", null,
-                            h("code", null,
-                                "#",
-                                article.tag),
-                            h("button", { onClick: () => dispatch({ type: "favorite", title: article.title }) },
-                                liked ? article.favorites + 1 : article.favorites,
-                                " favorites"))));
-                })),
-            h("aside", { className: "rw-editor" },
-                h("strong", null, "Editor preview"),
-                h("textarea", { value: draft, onInput: (event) => setDraft(event.currentTarget.value) }),
-                h("p", null, draft)))));
+function Button(props) {
+    const theme = useContext(ThemeContext);
+    const className = useMemo(() => cx("chakra-button", `chakra-${props.variant ?? "solid"}`, `chakra-${props.size ?? "md"}`, `accent-${theme.accent}`), [props.size, props.variant, theme.accent]);
+    return (h("button", { className: className, onClick: props.onClick, type: "button" }, props.children));
+}
+function Card(props) {
+    return (h("article", { className: "chakra-card" },
+        h("h3", null, props.title),
+        h("div", null, props.children)));
+}
+function Stat(props) {
+    return (h("article", { className: "chakra-stat" },
+        h("strong", null, props.value),
+        h("span", null, props.label)));
+}
+function ChakraUiApp(props) {
+    const [mode, setMode] = useState("Light");
+    const [activeTab, setActiveTab] = useState("Compositions");
+    const [accent, setAccent] = useState("teal");
+    const context = useMemo(() => ({ accent, mode }), [accent, mode]);
+    return (h(ThemeContext.Provider, { value: context },
+        h("section", { className: mode === "Dark" ? "chakra-app dark" : "chakra-app" },
+            h("header", { className: "chakra-hero" },
+                h("div", null,
+                    h("p", { className: "origin" }, "chakra-ui / apps/www + packages/react"),
+                    h("h2", null, "Chakra UI system console compiled as a Web Component"),
+                    h("span", null, "Theme context, composed primitives, responsive cards, token controls, and component previews run inside one generated custom element.")),
+                h(Button, { onClick: () => props.onAction?.({ name: "Publish Chakra theme" }) }, "Publish theme")),
+            h("nav", { className: "chakra-tabs" }, ["Compositions", "Tokens", "Recipes", "Examples"].map((tab) => (h("button", { className: activeTab === tab ? "active" : "", onClick: () => setActiveTab(tab) }, tab)))),
+            h("main", { className: "chakra-grid" },
+                h(Card, { title: "Theme controls" },
+                    h("label", null,
+                        "Color mode",
+                        h("select", { value: mode, onChange: (event) => setMode(event.currentTarget.value) },
+                            h("option", null, "Light"),
+                            h("option", null, "Dark"))),
+                    h("label", null,
+                        "Accent token",
+                        h("select", { value: accent, onChange: (event) => setAccent(event.currentTarget.value) },
+                            h("option", null, "teal"),
+                            h("option", null, "blue"),
+                            h("option", null, "purple")))),
+                h(Card, { title: "Button recipe" },
+                    h("div", { className: "chakra-actions" },
+                        h(Button, null, "Solid"),
+                        h(Button, { variant: "subtle" }, "Subtle"),
+                        h(Button, { variant: "outline" }, "Outline"))),
+                h(Card, { title: "Composition registry" },
+                    h("div", { className: "chakra-table" }, ["Accordion", "Dialog", "Menu", "Toast"].map((name) => (h("div", null,
+                        h("strong", null, name),
+                        h("span", null, activeTab),
+                        h(Button, { size: "sm", variant: "outline", onClick: () => props.onAction?.({ name }) }, "Inspect")))))),
+                h("section", { className: "chakra-stats" },
+                    h(Stat, { label: "packages/react exports", value: "120+" }),
+                    h(Stat, { label: "composition demos", value: "40+" }),
+                    h(Stat, { label: "theme tokens", value: "300+" }))))));
 }
 
 
-defineComponentTag("lab-realworld-app", RealWorldApp, {"shadow":{"mode":"open"},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  button,input,select,textarea{font:inherit}\n  button{border:0}\n  .rw-app,.bp-app,.jira-app,.kit-app{display:grid;gap:18px;min-width:0}\n  .rw-hero{display:grid;gap:28px;border-radius:10px;background:#0f8f68;color:white;padding:22px}\n  .rw-hero nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}\n  .rw-hero nav strong{font-size:24px}\n  .rw-hero h2,.bp-header h2,.jira-header h2,.kit-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .rw-hero p{max-width:760px;line-height:1.6}\n  .rw-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}\n  .rw-feed,.rw-editor{display:grid;align-content:start;gap:14px}\n  .rw-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #d8e0e7;padding-bottom:10px}\n  .rw-tabs button,.bp-filter button,.kit-tabs button{border-radius:6px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .rw-tabs button.active,.bp-filter button.active,.kit-tabs button.active{background:#0f8f68;color:white}\n  .rw-article,.rw-editor,.bp-metrics article,.bp-table article,.kit-card{border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:14px}\n  .rw-article{display:grid;gap:10px}\n  .rw-article div,.rw-article footer,.bp-header,.jira-header,.kit-hero{display:flex;align-items:center;justify-content:space-between;gap:12px}\n  .rw-article div{align-items:flex-start}\n  .rw-article div span,.rw-article p,.rw-editor p,.bp-header span,.kit-hero span{color:#566273}\n  .rw-article footer{flex-wrap:wrap}\n  .rw-article footer button,.bp-header button,.bp-table button,.jira-header button{border-radius:6px;background:#111827;color:#fff;padding:9px 12px;cursor:pointer}\n  .rw-editor textarea{min-height:160px;resize:vertical;border:1px solid #cbd5df;border-radius:8px;padding:12px}\n  .bp-app{grid-template-columns:220px minmax(0,1fr)}\n  .bp-sidebar,.jira-left{display:grid;align-content:start;gap:13px;border-radius:10px;background:#102033;color:white;padding:18px}\n  .bp-sidebar strong,.jira-left strong{font-size:19px}\n  .bp-sidebar span,.jira-left span{color:#d6dee8}\n  .bp-app main,.jira-app main{display:grid;gap:16px;min-width:0}\n  .bp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .bp-metrics article{display:grid;gap:4px}\n  .bp-metrics strong{font-size:28px}\n  .bp-metrics span,.bp-table span{color:#566273}\n  .bp-filter{display:flex;gap:8px;flex-wrap:wrap}\n  .bp-table{display:grid;gap:10px}\n  .bp-table article{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px auto;align-items:center;gap:12px}\n  .bp-table article div{display:grid;gap:4px}\n  .bp-table code,.jira-column header span,.kit-badge{width:max-content;border-radius:999px;background:#eef3f7;padding:5px 8px;color:#526070}\n  .jira-app{grid-template-columns:190px minmax(0,1fr) 260px}\n  .jira-controls{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px}\n  .jira-controls input,.jira-controls select,.kit-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .jira-columns{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}\n  .jira-column{display:grid;align-content:start;gap:10px;border-radius:10px;background:#eef3f7;padding:12px;min-height:430px}\n  .jira-column header{display:flex;align-items:center;justify-content:space-between}\n  .jira-card{display:grid;gap:7px;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;text-align:left;cursor:pointer}\n  .jira-card.selected{border-color:#0f8f68;box-shadow:0 0 0 2px rgba(15,143,104,.12)}\n  .jira-card span,.jira-card small{color:#566273}\n  .jira-detail{display:grid;align-content:start;gap:10px;border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .jira-detail h3{margin:0;font-size:26px}\n  .jira-detail dl{display:grid;gap:10px;margin:0}\n  .jira-detail div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px}\n  .jira-detail dt{color:#566273}\n  .jira-detail dd{margin:0;font-weight:700}\n  .kit-hero{align-items:flex-start;border-bottom:1px solid #d8e0e7;padding-bottom:16px}\n  .kit-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .kit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .kit-card{display:grid;gap:12px}\n  .kit-card h3{margin:0;font-size:18px}\n  .kit-card label{display:grid;gap:7px;color:#566273}\n  .kit-card p{color:#566273}\n  .kit-table{display:grid;gap:8px}\n  .kit-table div{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .badge-row{display:flex;gap:8px;flex-wrap:wrap}\n  .tone-green{background:#e5f7ef;color:#0f684f}\n  .tone-amber{background:#fff3cc;color:#7c5700}\n  .tone-red{background:#ffe2e0;color:#8a1f17}\n  .variant-destructive{background:#b42318;color:#fff}\n  .variant-destructive:hover:not(:disabled){background:#921b13}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n  @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}\n"});
+defineComponentTag("lab-chakra-ui-app", ChakraUiApp, {"shadow":{"mode":"open"},"events":{"onAction":{"name":"action"}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  button,input,select,textarea{font:inherit}\n  button{border:0}\n  .rw-app,.bp-app,.jira-app,.kit-app{display:grid;gap:18px;min-width:0}\n  .rw-hero{display:grid;gap:28px;border-radius:10px;background:#0f8f68;color:white;padding:22px}\n  .rw-hero nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}\n  .rw-hero nav strong{font-size:24px}\n  .rw-hero h2,.bp-header h2,.jira-header h2,.kit-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .rw-hero p{max-width:760px;line-height:1.6}\n  .rw-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}\n  .rw-feed,.rw-editor{display:grid;align-content:start;gap:14px}\n  .rw-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #d8e0e7;padding-bottom:10px}\n  .rw-tabs button,.bp-filter button,.kit-tabs button{border-radius:6px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .rw-tabs button.active,.bp-filter button.active,.kit-tabs button.active{background:#0f8f68;color:white}\n  .rw-article,.rw-editor,.bp-metrics article,.bp-table article,.kit-card{border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:14px}\n  .rw-article{display:grid;gap:10px}\n  .rw-article div,.rw-article footer,.bp-header,.jira-header,.kit-hero{display:flex;align-items:center;justify-content:space-between;gap:12px}\n  .rw-article div{align-items:flex-start}\n  .rw-article div span,.rw-article p,.rw-editor p,.bp-header span,.kit-hero span{color:#566273}\n  .rw-article footer{flex-wrap:wrap}\n  .rw-article footer button,.bp-header button,.bp-table button,.jira-header button{border-radius:6px;background:#111827;color:#fff;padding:9px 12px;cursor:pointer}\n  .rw-editor textarea{min-height:160px;resize:vertical;border:1px solid #cbd5df;border-radius:8px;padding:12px}\n  .bp-app{grid-template-columns:220px minmax(0,1fr)}\n  .bp-sidebar,.jira-left{display:grid;align-content:start;gap:13px;border-radius:10px;background:#102033;color:white;padding:18px}\n  .bp-sidebar strong,.jira-left strong{font-size:19px}\n  .bp-sidebar span,.jira-left span{color:#d6dee8}\n  .bp-app main,.jira-app main{display:grid;gap:16px;min-width:0}\n  .bp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .bp-metrics article{display:grid;gap:4px}\n  .bp-metrics strong{font-size:28px}\n  .bp-metrics span,.bp-table span{color:#566273}\n  .bp-filter{display:flex;gap:8px;flex-wrap:wrap}\n  .bp-table{display:grid;gap:10px}\n  .bp-table article{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px auto;align-items:center;gap:12px}\n  .bp-table article div{display:grid;gap:4px}\n  .bp-table code,.jira-column header span,.kit-badge{width:max-content;border-radius:999px;background:#eef3f7;padding:5px 8px;color:#526070}\n  .jira-app{grid-template-columns:190px minmax(0,1fr) 260px}\n  .jira-controls{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px}\n  .jira-controls input,.jira-controls select,.kit-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .jira-columns{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}\n  .jira-column{display:grid;align-content:start;gap:10px;border-radius:10px;background:#eef3f7;padding:12px;min-height:430px}\n  .jira-column header{display:flex;align-items:center;justify-content:space-between}\n  .jira-card{display:grid;gap:7px;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;text-align:left;cursor:pointer}\n  .jira-card.selected{border-color:#0f8f68;box-shadow:0 0 0 2px rgba(15,143,104,.12)}\n  .jira-card span,.jira-card small{color:#566273}\n  .jira-detail{display:grid;align-content:start;gap:10px;border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .jira-detail h3{margin:0;font-size:26px}\n  .jira-detail dl{display:grid;gap:10px;margin:0}\n  .jira-detail div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px}\n  .jira-detail dt{color:#566273}\n  .jira-detail dd{margin:0;font-weight:700}\n  .kit-hero{align-items:flex-start;border-bottom:1px solid #d8e0e7;padding-bottom:16px}\n  .kit-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .kit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .kit-card{display:grid;gap:12px}\n  .kit-card h3{margin:0;font-size:18px}\n  .kit-card label{display:grid;gap:7px;color:#566273}\n  .kit-card p{color:#566273}\n  .kit-table{display:grid;gap:8px}\n  .kit-table div{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .badge-row{display:flex;gap:8px;flex-wrap:wrap}\n  .tone-green{background:#e5f7ef;color:#0f684f}\n  .tone-amber{background:#fff3cc;color:#7c5700}\n  .tone-red{background:#ffe2e0;color:#8a1f17}\n  .variant-destructive{background:#b42318;color:#fff}\n  .variant-destructive:hover:not(:disabled){background:#921b13}\n  .large-app,.chakra-app{display:grid;gap:18px;min-width:0}\n  .large-hero,.chakra-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-radius:12px;background:#102033;color:white;padding:22px}\n  .large-hero h2,.chakra-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .large-hero span,.chakra-hero span{display:block;max-width:760px;color:#d6dee8;line-height:1.6}\n  .large-hero strong{border-radius:999px;background:#0f8f68;padding:9px 12px;white-space:nowrap}\n  .large-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}\n  .large-panel,.chakra-card,.chakra-stat{border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .large-panel{display:grid;align-content:start;gap:14px}\n  .large-panel label,.chakra-card label{display:grid;gap:7px;color:#566273;font-weight:700}\n  .large-panel input,.chakra-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .friend-list{display:grid;gap:10px}\n  .friend-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #e5ebf0;border-radius:10px;background:#f8fafc;padding:12px}\n  .avatar{display:grid;place-items:center;width:42px;height:42px;border-radius:999px;background:#0f8f68;color:white;font-weight:800}\n  .friend-card div{display:grid;gap:3px}\n  .friend-card small,.large-panel p{color:#566273}\n  .friend-card button,.load-more,.secondary-action,.chakra-button{border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:750}\n  .friend-card button,.load-more,.chakra-solid{background:#111827;color:white}\n  .secondary-action,.chakra-outline{border:1px solid #cbd5df;background:#fff;color:#162033}\n  .notification-list{display:grid;gap:8px}\n  .notification-list span{border-radius:8px;background:#e5f7ef;color:#0f684f;padding:9px 10px}\n  .chakra-app{border-radius:12px}\n  .chakra-app.dark{background:#0b1220;color:#e9eef5}\n  .chakra-hero{background:linear-gradient(135deg,#102033,#0f684f)}\n  .chakra-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .chakra-tabs button{border-radius:8px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .chakra-tabs button.active{background:#0f8f68;color:white}\n  .chakra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .chakra-card{display:grid;gap:12px}\n  .chakra-card h3{margin:0;font-size:18px}\n  .chakra-actions{display:flex;gap:10px;flex-wrap:wrap}\n  .chakra-subtle{background:#e5f7ef;color:#0f684f}\n  .chakra-sm{padding:7px 10px;font-size:13px}\n  .chakra-md{padding:9px 12px}\n  .chakra-lg{padding:12px 16px;font-size:16px}\n  .accent-blue.chakra-solid{background:#1d4ed8}\n  .accent-purple.chakra-solid{background:#7c3aed}\n  .chakra-table{display:grid;gap:8px}\n  .chakra-table div{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .chakra-table span{color:#566273}\n  .chakra-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .chakra-stat{display:grid;gap:4px}\n  .chakra-stat strong{font-size:28px}\n  .chakra-stat span{color:#566273}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n  @media(max-width:980px){.large-layout,.chakra-grid,.chakra-stats{grid-template-columns:1fr}.large-hero,.chakra-hero{flex-direction:column}.friend-card{grid-template-columns:1fr}.chakra-table div{grid-template-columns:1fr}}\n  @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}\n"});

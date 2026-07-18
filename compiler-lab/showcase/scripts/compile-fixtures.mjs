@@ -101,37 +101,65 @@ const styles = `
   .tone-red{background:#ffe2e0;color:#8a1f17}
   .variant-destructive{background:#b42318;color:#fff}
   .variant-destructive:hover:not(:disabled){background:#921b13}
+  .large-app,.chakra-app{display:grid;gap:18px;min-width:0}
+  .large-hero,.chakra-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;border-radius:12px;background:#102033;color:white;padding:22px}
+  .large-hero h2,.chakra-hero h2{margin:0;font-size:32px;line-height:1.05}
+  .large-hero span,.chakra-hero span{display:block;max-width:760px;color:#d6dee8;line-height:1.6}
+  .large-hero strong{border-radius:999px;background:#0f8f68;padding:9px 12px;white-space:nowrap}
+  .large-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+  .large-panel,.chakra-card,.chakra-stat{border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}
+  .large-panel{display:grid;align-content:start;gap:14px}
+  .large-panel label,.chakra-card label{display:grid;gap:7px;color:#566273;font-weight:700}
+  .large-panel input,.chakra-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}
+  .friend-list{display:grid;gap:10px}
+  .friend-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #e5ebf0;border-radius:10px;background:#f8fafc;padding:12px}
+  .avatar{display:grid;place-items:center;width:42px;height:42px;border-radius:999px;background:#0f8f68;color:white;font-weight:800}
+  .friend-card div{display:grid;gap:3px}
+  .friend-card small,.large-panel p{color:#566273}
+  .friend-card button,.load-more,.secondary-action,.chakra-button{border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:750}
+  .friend-card button,.load-more,.chakra-solid{background:#111827;color:white}
+  .secondary-action,.chakra-outline{border:1px solid #cbd5df;background:#fff;color:#162033}
+  .notification-list{display:grid;gap:8px}
+  .notification-list span{border-radius:8px;background:#e5f7ef;color:#0f684f;padding:9px 10px}
+  .chakra-app{border-radius:12px}
+  .chakra-app.dark{background:#0b1220;color:#e9eef5}
+  .chakra-hero{background:linear-gradient(135deg,#102033,#0f684f)}
+  .chakra-tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .chakra-tabs button{border-radius:8px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}
+  .chakra-tabs button.active{background:#0f8f68;color:white}
+  .chakra-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .chakra-card{display:grid;gap:12px}
+  .chakra-card h3{margin:0;font-size:18px}
+  .chakra-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .chakra-subtle{background:#e5f7ef;color:#0f684f}
+  .chakra-sm{padding:7px 10px;font-size:13px}
+  .chakra-md{padding:9px 12px}
+  .chakra-lg{padding:12px 16px;font-size:16px}
+  .accent-blue.chakra-solid{background:#1d4ed8}
+  .accent-purple.chakra-solid{background:#7c3aed}
+  .chakra-table{display:grid;gap:8px}
+  .chakra-table div{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}
+  .chakra-table span{color:#566273}
+  .chakra-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .chakra-stat{display:grid;gap:4px}
+  .chakra-stat strong{font-size:28px}
+  .chakra-stat span{color:#566273}
   @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}
+  @media(max-width:980px){.large-layout,.chakra-grid,.chakra-stats{grid-template-columns:1fr}.large-hero,.chakra-hero{flex-direction:column}.friend-card{grid-template-columns:1fr}.chakra-table div{grid-template-columns:1fr}}
   @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}
 `;
 
 const fixtures = [
   {
-    name: "realworld-app",
-    input: resolve(showcase, "src/react-sources/realworld-app.tsx"),
-    output: resolve(outDir, "realworld-app.js"),
+    name: "large-project-demo-app",
+    input: resolve(showcase, "src/react-sources/large-project-demo-app.tsx"),
+    output: resolve(outDir, "large-project-demo-app.js"),
     registrations: [
       {
-        tagName: "lab-realworld-app",
-        component: "RealWorldApp",
+        tagName: "lab-large-project-app",
+        component: "LargeProjectDemoApp",
         options: {
           shadow: { mode: "open" },
-          styles
-        }
-      }
-    ]
-  },
-  {
-    name: "bulletproof-app",
-    input: resolve(showcase, "src/react-sources/bulletproof-app.tsx"),
-    output: resolve(outDir, "bulletproof-app.js"),
-    registrations: [
-      {
-        tagName: "lab-bulletproof-app",
-        component: "BulletproofApp",
-        options: {
-          shadow: { mode: "open" },
-          props: { user: { attribute: false } },
           styles
         }
       }
@@ -154,13 +182,13 @@ const fixtures = [
     ]
   },
   {
-    name: "shadcn-kit",
-    input: resolve(showcase, "src/react-sources/shadcn-kit.tsx"),
-    output: resolve(outDir, "shadcn-kit.js"),
+    name: "chakra-ui-app",
+    input: resolve(showcase, "src/react-sources/chakra-ui-app.tsx"),
+    output: resolve(outDir, "chakra-ui-app.js"),
     registrations: [
       {
-        tagName: "lab-shadcn-kit",
-        component: "ShadcnKit",
+        tagName: "lab-chakra-ui-app",
+        component: "ChakraUiApp",
         options: {
           shadow: { mode: "open" },
           events: { onAction: { name: "action" } },
