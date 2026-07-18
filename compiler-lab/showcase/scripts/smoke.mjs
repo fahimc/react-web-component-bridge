@@ -32,44 +32,43 @@ try {
   const landingMetrics = await page.evaluate(() => ({
     demoCards: document.querySelectorAll(".demo-card").length,
     renderedDemos: document.querySelectorAll(
-      "lab-realworld-banner,lab-bulletproof-dashboard,lab-jira-board,lab-shadcn-button"
+      "lab-realworld-app,lab-bulletproof-app,lab-jira-app,lab-shadcn-kit"
     ).length
   }));
   if (landingMetrics.demoCards !== 4) throw new Error("Landing page demo links missing");
   if (landingMetrics.renderedDemos !== 0) throw new Error("Landing page should link to demos only");
 
   await page.goto("http://127.0.0.1:4188/#/realworld", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-realworld-banner");
+  await page.waitForSelector("lab-realworld-app");
   await page.waitForFunction(() =>
-    document.querySelector("lab-realworld-banner")?.shadowRoot?.textContent?.includes("conduit")
+    document.querySelector("lab-realworld-app")?.shadowRoot?.textContent?.includes("Global Feed")
   );
   await page.goto("http://127.0.0.1:4188/#/bulletproof", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-bulletproof-dashboard");
+  await page.waitForSelector("lab-bulletproof-app");
   await page.waitForFunction(() =>
     document
-      .querySelector("lab-bulletproof-dashboard")
+      .querySelector("lab-bulletproof-app")
       ?.shadowRoot?.textContent?.includes("Katherine Johnson")
   );
   await page.goto("http://127.0.0.1:4188/#/shadcn", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-shadcn-button");
+  await page.waitForSelector("lab-shadcn-kit");
   await page.waitForFunction(() =>
-    document.querySelector("lab-shadcn-button")?.shadowRoot?.textContent?.includes("Primary action")
+    document
+      .querySelector("lab-shadcn-kit")
+      ?.shadowRoot?.textContent?.includes("Design system workbench")
   );
-  await page
-    .locator("lab-shadcn-button")
-    .first()
-    .evaluate((element) => {
-      const button = element.shadowRoot?.querySelector("button");
-      if (!button) throw new Error("shadcn button not rendered");
-      button.click();
-    });
+  await page.locator("lab-shadcn-kit").evaluate((element) => {
+    const button = element.shadowRoot?.querySelector("button");
+    if (!button) throw new Error("shadcn kit action not rendered");
+    button.click();
+  });
   await page.waitForFunction(() =>
-    document.querySelector(".button-log")?.textContent?.includes("Primary action")
+    document.querySelector(".button-log")?.textContent?.includes("Publish theme")
   );
   await page.goto("http://127.0.0.1:4188/#/jira", { waitUntil: "networkidle" });
-  await page.waitForSelector("lab-jira-board");
-  await page.locator("lab-jira-board").evaluate((element) => {
-    const issue = element.shadowRoot?.querySelector("button.issue");
+  await page.waitForSelector("lab-jira-app");
+  await page.locator("lab-jira-app").evaluate((element) => {
+    const issue = element.shadowRoot?.querySelector("button.jira-card");
     if (!issue) throw new Error("Issue button not rendered");
     issue.click();
   });
@@ -79,13 +78,13 @@ try {
   const metrics = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
     clientWidth: document.documentElement.clientWidth,
-    jiraText: document.querySelector("lab-jira-board")?.shadowRoot?.textContent ?? "",
+    jiraText: document.querySelector("lab-jira-app")?.shadowRoot?.textContent ?? "",
     eventText: document.querySelector(".event-log")?.textContent ?? ""
   }));
   console.log(JSON.stringify({ metrics, errors }, null, 2));
   if (metrics.scrollWidth !== metrics.clientWidth) throw new Error("Mobile horizontal overflow");
   if (!metrics.jiraText.includes("Kanban board")) throw new Error("Jira board missing");
-  if (!metrics.eventText.includes("RWCB-101")) throw new Error("Jira event not dispatched");
+  if (!metrics.eventText.includes("RWCB-")) throw new Error("Jira event not dispatched");
   if (errors.length > 0) throw new Error(errors.join("\n"));
   await browser.close();
 } finally {

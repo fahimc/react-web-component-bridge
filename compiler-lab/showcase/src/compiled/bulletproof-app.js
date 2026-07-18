@@ -465,34 +465,78 @@ function toKebab(value) {
   return value.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()).replace(/^-/, "");
 }
 
-const UserContext = createContext({
-    firstName: "Ada",
-    lastName: "Lovelace",
+const AuthContext = createContext({
+    firstName: "Katherine",
+    lastName: "Johnson",
     role: "ADMIN"
 });
-function DashboardInfo() {
-    const user = useContext(UserContext);
-    const permissions = useMemo(() => user.role === "ADMIN"
-        ? ["Create discussions", "Edit discussions", "Delete discussions", "Moderate comments"]
-        : ["Create comments", "Delete own comments"], [user.role]);
-    return (h("section", { className: "bp-dashboard" },
-        h("p", { className: "origin" }, "Bulletproof React dashboard pattern"),
-        h("h2", null,
-            "Welcome",
-            " ",
-            h("b", null,
-                user.firstName,
-                " ",
-                user.lastName)),
-        h("p", null,
-            "Your role is ",
-            h("strong", null, user.role)),
-        h("ul", null, permissions.map((item) => (h("li", null, item))))));
+const discussions = [
+    { comments: 18, owner: "Platform", status: "Open", title: "Compiler output contract" },
+    {
+        comments: 9,
+        owner: "Design Systems",
+        status: "Review",
+        title: "Component library variant policy"
+    },
+    { comments: 31, owner: "Frameworks", status: "Resolved", title: "Angular consumer integration" }
+];
+function usePermissions(role) {
+    return useMemo(() => ({
+        canCreate: role === "ADMIN" || role === "EDITOR",
+        canDelete: role === "ADMIN",
+        canModerate: role !== "VIEWER"
+    }), [role]);
 }
-function BulletproofDashboard(props) {
-    return (h(UserContext.Provider, { value: props.user ?? { firstName: "Grace", lastName: "Hopper", role: "ADMIN" } },
-        h(DashboardInfo, null)));
+function DashboardContent() {
+    const user = useContext(AuthContext);
+    const [status, setStatus] = useState("All");
+    const permissions = usePermissions(user.role);
+    const visible = useMemo(() => discussions.filter((discussion) => status === "All" || discussion.status === status), [status]);
+    return (h("section", { className: "bp-app" },
+        h("aside", { className: "bp-sidebar" },
+            h("strong", null, "Bulletproof"),
+            h("span", null, "Dashboard"),
+            h("span", null, "Discussions"),
+            h("span", null, "Users"),
+            h("span", null, "Audit log")),
+        h("main", null,
+            h("header", { className: "bp-header" },
+                h("div", null,
+                    h("p", { className: "origin" }, "Bulletproof React app pattern"),
+                    h("h2", null,
+                        "Welcome ",
+                        user.firstName,
+                        " ",
+                        user.lastName),
+                    h("span", null,
+                        user.role,
+                        " workspace with permission-gated actions")),
+                h("button", { disabled: !permissions.canCreate }, "Create discussion")),
+            h("section", { className: "bp-metrics" },
+                h("article", null,
+                    h("strong", null, "58"),
+                    h("span", null, "active users")),
+                h("article", null,
+                    h("strong", null, "12"),
+                    h("span", null, "open reviews")),
+                h("article", null,
+                    h("strong", null, permissions.canDelete ? "Full" : "Limited"),
+                    h("span", null, "admin access"))),
+            h("div", { className: "bp-filter" }, ["All", "Open", "Review", "Resolved"].map((item) => (h("button", { className: status === item ? "active" : "", onClick: () => setStatus(item) }, item)))),
+            h("section", { className: "bp-table" }, visible.map((discussion) => (h("article", null,
+                h("div", null,
+                    h("strong", null, discussion.title),
+                    h("span", null, discussion.owner)),
+                h("code", null, discussion.status),
+                h("span", null,
+                    discussion.comments,
+                    " comments"),
+                h("button", { disabled: !permissions.canModerate }, "Moderate"))))))));
+}
+function BulletproofApp(props) {
+    return (h(AuthContext.Provider, { value: props.user ?? { firstName: "Katherine", lastName: "Johnson", role: "ADMIN" } },
+        h(DashboardContent, null)));
 }
 
 
-defineComponentTag("lab-bulletproof-dashboard", BulletproofDashboard, {"shadow":{"mode":"open"},"props":{"user":{"attribute":false}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n"});
+defineComponentTag("lab-bulletproof-app", BulletproofApp, {"shadow":{"mode":"open"},"props":{"user":{"attribute":false}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  button,input,select,textarea{font:inherit}\n  button{border:0}\n  .rw-app,.bp-app,.jira-app,.kit-app{display:grid;gap:18px;min-width:0}\n  .rw-hero{display:grid;gap:28px;border-radius:10px;background:#0f8f68;color:white;padding:22px}\n  .rw-hero nav{display:flex;align-items:center;gap:18px;flex-wrap:wrap}\n  .rw-hero nav strong{font-size:24px}\n  .rw-hero h2,.bp-header h2,.jira-header h2,.kit-hero h2{margin:0;font-size:32px;line-height:1.05}\n  .rw-hero p{max-width:760px;line-height:1.6}\n  .rw-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px}\n  .rw-feed,.rw-editor{display:grid;align-content:start;gap:14px}\n  .rw-tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #d8e0e7;padding-bottom:10px}\n  .rw-tabs button,.bp-filter button,.kit-tabs button{border-radius:6px;background:#eef3f7;color:#526070;padding:8px 10px;cursor:pointer}\n  .rw-tabs button.active,.bp-filter button.active,.kit-tabs button.active{background:#0f8f68;color:white}\n  .rw-article,.rw-editor,.bp-metrics article,.bp-table article,.kit-card{border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:14px}\n  .rw-article{display:grid;gap:10px}\n  .rw-article div,.rw-article footer,.bp-header,.jira-header,.kit-hero{display:flex;align-items:center;justify-content:space-between;gap:12px}\n  .rw-article div{align-items:flex-start}\n  .rw-article div span,.rw-article p,.rw-editor p,.bp-header span,.kit-hero span{color:#566273}\n  .rw-article footer{flex-wrap:wrap}\n  .rw-article footer button,.bp-header button,.bp-table button,.jira-header button{border-radius:6px;background:#111827;color:#fff;padding:9px 12px;cursor:pointer}\n  .rw-editor textarea{min-height:160px;resize:vertical;border:1px solid #cbd5df;border-radius:8px;padding:12px}\n  .bp-app{grid-template-columns:220px minmax(0,1fr)}\n  .bp-sidebar,.jira-left{display:grid;align-content:start;gap:13px;border-radius:10px;background:#102033;color:white;padding:18px}\n  .bp-sidebar strong,.jira-left strong{font-size:19px}\n  .bp-sidebar span,.jira-left span{color:#d6dee8}\n  .bp-app main,.jira-app main{display:grid;gap:16px;min-width:0}\n  .bp-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}\n  .bp-metrics article{display:grid;gap:4px}\n  .bp-metrics strong{font-size:28px}\n  .bp-metrics span,.bp-table span{color:#566273}\n  .bp-filter{display:flex;gap:8px;flex-wrap:wrap}\n  .bp-table{display:grid;gap:10px}\n  .bp-table article{display:grid;grid-template-columns:minmax(0,1fr) 90px 110px auto;align-items:center;gap:12px}\n  .bp-table article div{display:grid;gap:4px}\n  .bp-table code,.jira-column header span,.kit-badge{width:max-content;border-radius:999px;background:#eef3f7;padding:5px 8px;color:#526070}\n  .jira-app{grid-template-columns:190px minmax(0,1fr) 260px}\n  .jira-controls{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:10px}\n  .jira-controls input,.jira-controls select,.kit-card select{border:1px solid #cbd5df;border-radius:8px;padding:10px}\n  .jira-columns{display:grid;grid-template-columns:repeat(4,minmax(190px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}\n  .jira-column{display:grid;align-content:start;gap:10px;border-radius:10px;background:#eef3f7;padding:12px;min-height:430px}\n  .jira-column header{display:flex;align-items:center;justify-content:space-between}\n  .jira-card{display:grid;gap:7px;width:100%;border:1px solid #d8e0e7;border-radius:8px;background:#fff;padding:12px;text-align:left;cursor:pointer}\n  .jira-card.selected{border-color:#0f8f68;box-shadow:0 0 0 2px rgba(15,143,104,.12)}\n  .jira-card span,.jira-card small{color:#566273}\n  .jira-detail{display:grid;align-content:start;gap:10px;border:1px solid #d8e0e7;border-radius:10px;background:#fff;padding:16px}\n  .jira-detail h3{margin:0;font-size:26px}\n  .jira-detail dl{display:grid;gap:10px;margin:0}\n  .jira-detail div{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px}\n  .jira-detail dt{color:#566273}\n  .jira-detail dd{margin:0;font-weight:700}\n  .kit-hero{align-items:flex-start;border-bottom:1px solid #d8e0e7;padding-bottom:16px}\n  .kit-tabs{display:flex;gap:8px;flex-wrap:wrap}\n  .kit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}\n  .kit-card{display:grid;gap:12px}\n  .kit-card h3{margin:0;font-size:18px}\n  .kit-card label{display:grid;gap:7px;color:#566273}\n  .kit-card p{color:#566273}\n  .kit-table{display:grid;gap:8px}\n  .kit-table div{display:grid;grid-template-columns:minmax(0,1fr) 70px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}\n  .badge-row{display:flex;gap:8px;flex-wrap:wrap}\n  .tone-green{background:#e5f7ef;color:#0f684f}\n  .tone-amber{background:#fff3cc;color:#7c5700}\n  .tone-red{background:#ffe2e0;color:#8a1f17}\n  .variant-destructive{background:#b42318;color:#fff}\n  .variant-destructive:hover:not(:disabled){background:#921b13}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n  @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}\n"});

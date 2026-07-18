@@ -1,7 +1,7 @@
-import "./compiled/realworld-banner.js";
-import "./compiled/bulletproof-dashboard.js";
-import "./compiled/jira-board.js";
-import "./compiled/shadcn-button.js";
+import "./compiled/realworld-app.js";
+import "./compiled/bulletproof-app.js";
+import "./compiled/jira-app.js";
+import "./compiled/shadcn-kit.js";
 import "./styles.css";
 
 type LabElement = HTMLElement & Record<string, unknown>;
@@ -25,8 +25,8 @@ const demos: Array<{
     title: "RealWorld React Redux",
     eyebrow: "Article app demo",
     description:
-      "A focused app page built around the cloned RealWorld React Redux source, compiling its banner component with unchanged React imports.",
-    tag: "lab-realworld-banner",
+      "A full article/feed app built from RealWorld React Redux patterns, compiled from React-shaped source into one custom element.",
+    tag: "lab-realworld-app",
     source: "gothinkster/react-redux-realworld-example-app"
   },
   {
@@ -35,7 +35,7 @@ const demos: Array<{
     eyebrow: "SaaS dashboard demo",
     description:
       "A dashboard-style page using Bulletproof React auth and permission patterns, compiled as a native custom element.",
-    tag: "lab-bulletproof-dashboard",
+    tag: "lab-bulletproof-app",
     source: "alan2207/bulletproof-react"
   },
   {
@@ -44,7 +44,7 @@ const demos: Array<{
     eyebrow: "Kanban workflow demo",
     description:
       "A full board page based on Jira Clone board, filter, and issue-card patterns with CustomEvent output to the host page.",
-    tag: "lab-jira-board",
+    tag: "lab-jira-app",
     source: "oldboyxx/jira_clone"
   },
   {
@@ -52,8 +52,8 @@ const demos: Array<{
     title: "shadcn/ui",
     eyebrow: "Component library demo",
     description:
-      "A component-library page based on shadcn/ui button variant patterns, compiled into reusable custom-element buttons.",
-    tag: "lab-shadcn-button",
+      "A component-library workbench based on shadcn/ui variant patterns, compiled into one reusable design-system custom element.",
+    tag: "lab-shadcn-kit",
     source: "shadcn-ui/ui"
   }
 ];
@@ -154,17 +154,7 @@ const renderDemoBody = (id: DemoId) => {
   if (id === "realworld") {
     return `
       <section class="app-frame realworld-page">
-        <lab-realworld-banner appName="Conduit" token=""></lab-realworld-banner>
-        <div class="content-columns">
-          <article>
-            <h2>Global feed</h2>
-            <p>The compiled banner sits in a fuller RealWorld-style article layout so this page reads as an app demo, not a card sample.</p>
-          </article>
-          <article>
-            <h2>Popular tags</h2>
-            <p>react, web-components, compiler, angular, html</p>
-          </article>
-        </div>
+        <lab-realworld-app></lab-realworld-app>
       </section>
     `;
   }
@@ -172,15 +162,7 @@ const renderDemoBody = (id: DemoId) => {
   if (id === "bulletproof") {
     return `
       <section class="app-frame dashboard-page">
-        <aside>
-          <strong>Acme Console</strong>
-          <span>Dashboard</span>
-          <span>Teams</span>
-          <span>Settings</span>
-        </aside>
-        <div>
-          <lab-bulletproof-dashboard></lab-bulletproof-dashboard>
-        </div>
+        <lab-bulletproof-app></lab-bulletproof-app>
       </section>
     `;
   }
@@ -188,7 +170,7 @@ const renderDemoBody = (id: DemoId) => {
   if (id === "jira") {
     return `
       <section class="app-frame jira-page">
-        <lab-jira-board></lab-jira-board>
+        <lab-jira-app></lab-jira-app>
         <p class="event-log" aria-live="polite">Last event: none</p>
       </section>
     `;
@@ -196,16 +178,7 @@ const renderDemoBody = (id: DemoId) => {
 
   return `
     <section class="app-frame component-page">
-      <div class="component-toolbar">
-        <strong>Button variants</strong>
-        <span>Compiled component-library custom elements</span>
-      </div>
-      <div class="button-stack">
-        <lab-shadcn-button variant="default" size="md" label="Primary action"></lab-shadcn-button>
-        <lab-shadcn-button variant="outline" size="sm" label="Outline action"></lab-shadcn-button>
-        <lab-shadcn-button variant="secondary" size="lg" label="Secondary action"></lab-shadcn-button>
-        <lab-shadcn-button variant="default" size="md" label="Loading action" loading></lab-shadcn-button>
-      </div>
+      <lab-shadcn-kit></lab-shadcn-kit>
       <p class="button-log" aria-live="polite">Button event: none</p>
     </section>
   `;
@@ -213,14 +186,14 @@ const renderDemoBody = (id: DemoId) => {
 
 const bindDemo = (id: DemoId) => {
   if (id === "bulletproof") {
-    const dashboard = document.querySelector<LabElement>("lab-bulletproof-dashboard");
+    const dashboard = document.querySelector<LabElement>("lab-bulletproof-app");
     if (dashboard) {
       dashboard.user = { firstName: "Katherine", lastName: "Johnson", role: "ADMIN" };
     }
   }
 
   if (id === "jira") {
-    const board = document.querySelector<LabElement>("lab-jira-board");
+    const board = document.querySelector<LabElement>("lab-jira-app");
     const log = document.querySelector<HTMLElement>(".event-log");
     if (board && log) {
       board.addEventListener("issue-open", (event) => {
@@ -231,14 +204,13 @@ const bindDemo = (id: DemoId) => {
   }
 
   if (id === "shadcn") {
-    const buttons = document.querySelectorAll<LabElement>("lab-shadcn-button");
+    const kit = document.querySelector<LabElement>("lab-shadcn-kit");
     const buttonLog = document.querySelector<HTMLElement>(".button-log");
-    buttons.forEach((button) => {
-      button.addEventListener("action", () => {
-        if (buttonLog) {
-          buttonLog.textContent = `Button event: ${String(button.getAttribute("label") ?? "compiled button")}`;
-        }
-      });
+    kit?.addEventListener("action", (event) => {
+      const detail = (event as CustomEvent<{ name?: string }>).detail;
+      if (buttonLog) {
+        buttonLog.textContent = `Component event: ${detail.name ?? "unknown action"}`;
+      }
     });
   }
 };

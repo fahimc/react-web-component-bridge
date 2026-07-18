@@ -233,27 +233,6 @@ body {
   line-height: 1.6;
 }
 
-.dashboard-page {
-  grid-template-columns: 220px minmax(0, 1fr);
-}
-
-.dashboard-page aside {
-  display: grid;
-  align-content: start;
-  gap: 12px;
-  border-right: 1px solid #d8e0e7;
-  padding-right: 18px;
-}
-
-.dashboard-page aside strong {
-  margin-bottom: 6px;
-  font-size: 18px;
-}
-
-.dashboard-page aside span {
-  color: #566273;
-}
-
 .jira-page {
   background: #f8fafc;
 }
@@ -361,16 +340,8 @@ body {
     flex-direction: column;
   }
 
-  .content-columns,
-  .dashboard-page {
+  .content-columns {
     grid-template-columns: 1fr;
-  }
-
-  .dashboard-page aside {
-    border-right: 0;
-    border-bottom: 1px solid #d8e0e7;
-    padding-right: 0;
-    padding-bottom: 14px;
   }
 
   .component-toolbar {
