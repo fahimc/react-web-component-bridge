@@ -139,13 +139,23 @@ const styles = `
   .accent-purple.chakra-solid{background:#7c3aed}
   .chakra-table{display:grid;gap:8px}
   .chakra-table div{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;align-items:center;gap:10px;border-top:1px solid #eef3f7;padding-top:8px}
+  .chakra-table div.selected{border-color:#0f8f68;background:#eefbf6;border-radius:8px;padding:8px}
   .chakra-table span{color:#566273}
+  .chakra-inspector{display:grid;gap:12px}
+  .chakra-inspector dl{display:grid;gap:8px;margin:0}
+  .chakra-inspector dl div{display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px}
+  .chakra-inspector dt{color:#566273}
+  .chakra-inspector dd{margin:0;font-weight:750}
+  .chakra-dialog{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:rgba(15,32,51,.55);padding:18px}
+  .chakra-dialog-panel{display:grid;gap:12px;width:min(480px,100%);border-radius:12px;background:#fff;color:#162033;padding:18px;box-shadow:0 24px 80px rgba(15,32,51,.28)}
+  .chakra-dialog-panel span{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}
+  .chakra-dialog-panel h3{margin:0;font-size:24px}
   .chakra-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .chakra-stat{display:grid;gap:4px}
   .chakra-stat strong{font-size:28px}
   .chakra-stat span{color:#566273}
   @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}
-  @media(max-width:980px){.large-layout,.chakra-grid,.chakra-stats{grid-template-columns:1fr}.large-hero,.chakra-hero{flex-direction:column}.friend-card{grid-template-columns:1fr}.chakra-table div{grid-template-columns:1fr}}
+  @media(max-width:980px){.large-layout,.chakra-grid,.chakra-stats{grid-template-columns:1fr}.large-hero,.chakra-hero{flex-direction:column}.friend-card{grid-template-columns:1fr}.chakra-table div,.chakra-inspector dl div{grid-template-columns:1fr}}
   @media(max-width:980px){.rw-layout,.bp-app,.jira-app,.kit-grid{grid-template-columns:1fr}.jira-columns{grid-template-columns:repeat(4,240px)}.bp-table article{grid-template-columns:1fr}.kit-hero,.bp-header,.jira-header,.rw-article div,.rw-article footer{align-items:flex-start;flex-direction:column}.bp-metrics{grid-template-columns:1fr}.jira-left{display:none}.jira-detail{order:3}.jira-controls{grid-template-columns:1fr}}
 `;
 

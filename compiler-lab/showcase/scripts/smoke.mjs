@@ -59,6 +59,34 @@ try {
   await page.waitForFunction(() =>
     document.querySelector(".button-log")?.textContent?.includes("Publish Chakra theme")
   );
+  await page.locator("lab-chakra-ui-app").evaluate((element) => {
+    const rows = Array.from(element.shadowRoot?.querySelectorAll(".chakra-table div") ?? []);
+    const dialogRow = rows.find((row) => row.textContent?.includes("Dialog"));
+    const inspect = dialogRow?.querySelector("button");
+    if (!inspect) throw new Error("Dialog inspect button not rendered");
+    inspect.click();
+  });
+  await page.waitForFunction(() =>
+    document
+      .querySelector("lab-chakra-ui-app")
+      ?.shadowRoot?.textContent?.includes("Dialog composition")
+  );
+  await page.waitForFunction(() =>
+    document.querySelector(".button-log")?.textContent?.includes("Inspect Dialog")
+  );
+  await page.locator("lab-chakra-ui-app").evaluate((element) => {
+    const close = Array.from(element.shadowRoot?.querySelectorAll("button") ?? []).find(
+      (button) => button.textContent?.trim() === "Close"
+    );
+    if (!close) throw new Error("Dialog close button not rendered");
+    close.click();
+  });
+  await page.waitForFunction(
+    () =>
+      !document
+        .querySelector("lab-chakra-ui-app")
+        ?.shadowRoot?.textContent?.includes("Dialog composition")
+  );
   await page.goto("http://127.0.0.1:4188/#/jira", { waitUntil: "networkidle" });
   await page.waitForSelector("lab-jira-app");
   await page.locator("lab-jira-app").evaluate((element) => {

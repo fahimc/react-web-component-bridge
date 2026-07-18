@@ -2,6 +2,39 @@ import React, { createContext, useContext, useMemo, useState, type ReactNode } f
 
 type ColorMode = "Light" | "Dark";
 type Variant = "solid" | "subtle" | "outline";
+type ComponentName = "Accordion" | "Dialog" | "Menu" | "Toast";
+
+const registry: Array<{
+  name: ComponentName;
+  status: string;
+  exports: string;
+  notes: string;
+}> = [
+  {
+    name: "Accordion",
+    status: "Ready",
+    exports: "Root, Item, Trigger, Content",
+    notes: "Composes disclosure state, keyboard navigation, and animated content regions."
+  },
+  {
+    name: "Dialog",
+    status: "Interactive",
+    exports: "Root, Trigger, Content, Close",
+    notes: "Shows modal state, focus-safe controls, backdrop content, and close actions."
+  },
+  {
+    name: "Menu",
+    status: "Ready",
+    exports: "Root, Trigger, Positioner, Item",
+    notes: "Covers roving item selection, grouped commands, and layered popover markup."
+  },
+  {
+    name: "Toast",
+    status: "Ready",
+    exports: "Provider, Viewport, Title, Description",
+    notes: "Demonstrates provider-driven notifications and composition recipes."
+  }
+];
 
 const ThemeContext = createContext<{ mode: ColorMode; accent: string }>({
   accent: "teal",
@@ -58,7 +91,18 @@ export function ChakraUiApp(props: { onAction?: (action: { name: string }) => vo
   const [mode, setMode] = useState<ColorMode>("Light");
   const [activeTab, setActiveTab] = useState("Compositions");
   const [accent, setAccent] = useState("teal");
+  const [selectedName, setSelectedName] = useState<ComponentName>("Dialog");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const context = useMemo(() => ({ accent, mode }), [accent, mode]);
+  const selected = useMemo(
+    () => registry.find((item) => item.name === selectedName) ?? registry[0],
+    [selectedName]
+  );
+  const inspect = (name: ComponentName) => {
+    setSelectedName(name);
+    setDialogOpen(name === "Dialog");
+    props.onAction?.({ name: `Inspect ${name}` });
+  };
 
   return (
     <ThemeContext.Provider value={context}>
@@ -106,24 +150,80 @@ export function ChakraUiApp(props: { onAction?: (action: { name: string }) => vo
           </Card>
           <Card title="Button recipe">
             <div className="chakra-actions">
-              <Button>Solid</Button>
-              <Button variant="subtle">Subtle</Button>
-              <Button variant="outline">Outline</Button>
+              <Button onClick={() => props.onAction?.({ name: "Solid button recipe" })}>
+                Solid
+              </Button>
+              <Button
+                variant="subtle"
+                onClick={() => props.onAction?.({ name: "Subtle button recipe" })}
+              >
+                Subtle
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => props.onAction?.({ name: "Outline button recipe" })}
+              >
+                Outline
+              </Button>
             </div>
           </Card>
           <Card title="Composition registry">
             <div className="chakra-table">
-              {["Accordion", "Dialog", "Menu", "Toast"].map((name) => (
-                <div>
-                  <strong>{name}</strong>
+              {registry.map((item) => (
+                <div className={selectedName === item.name ? "selected" : ""}>
+                  <strong>{item.name}</strong>
                   <span>{activeTab}</span>
-                  <Button size="sm" variant="outline" onClick={() => props.onAction?.({ name })}>
+                  <Button size="sm" variant="outline" onClick={() => inspect(item.name)}>
                     Inspect
                   </Button>
                 </div>
               ))}
             </div>
           </Card>
+          <Card title={`${selected.name} inspector`}>
+            <div className="chakra-inspector">
+              <dl>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{selected.status}</dd>
+                </div>
+                <div>
+                  <dt>Exports</dt>
+                  <dd>{selected.exports}</dd>
+                </div>
+              </dl>
+              <p>{selected.notes}</p>
+              {selected.name === "Dialog" ? (
+                <Button variant="outline" onClick={() => setDialogOpen(true)}>
+                  Open dialog preview
+                </Button>
+              ) : (
+                <Button variant="subtle" onClick={() => props.onAction?.({ name: selected.name })}>
+                  Run preview
+                </Button>
+              )}
+            </div>
+          </Card>
+          {dialogOpen ? (
+            <section className="chakra-dialog" role="dialog" aria-modal="true">
+              <div className="chakra-dialog-panel">
+                <span>Composition preview</span>
+                <h3>Dialog composition</h3>
+                <p>
+                  The compiled component is managing open state, close actions, and nested
+                  composition content without React in the browser bundle.
+                </p>
+                <div className="chakra-actions">
+                  <Button size="sm" onClick={() => props.onAction?.({ name: "Confirm Dialog" })}>
+                    Confirm
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setDialogOpen(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </section>
+          ) : null}
           <section className="chakra-stats">
             <Stat label="packages/react exports" value="120+" />
             <Stat label="composition demos" value="40+" />
