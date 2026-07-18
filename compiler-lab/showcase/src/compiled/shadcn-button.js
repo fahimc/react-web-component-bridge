@@ -465,71 +465,26 @@ function toKebab(value) {
   return value.replace(/[A-Z]/g, (match) => "-" + match.toLowerCase()).replace(/^-/, "");
 }
 
-const defaultIssues = [
-    {
-        id: "j1",
-        key: "RWCB-101",
-        title: "Compile dashboard widgets",
-        status: "In Progress",
-        priority: "High",
-        assignee: "Ada"
-    },
-    {
-        id: "j2",
-        key: "RWCB-118",
-        title: "Ship Angular custom elements",
-        status: "Selected",
-        priority: "Medium",
-        assignee: "Grace"
-    },
-    {
-        id: "j3",
-        key: "RWCB-144",
-        title: "Verify browser smoke tests",
-        status: "Done",
-        priority: "Low",
-        assignee: "Linus"
-    }
-];
-function reducer(state, action) {
-    if (action.type === "search") {
-        return { ...state, search: action.value };
-    }
-    return { ...state, priority: action.value };
-}
-function JiraBoard(props) {
-    const [filters, dispatch] = useReducer(reducer, { search: "", priority: "All" });
-    const issues = props.issues ?? defaultIssues;
-    const visibleIssues = useMemo(() => issues.filter((issue) => {
-        const matchesSearch = issue.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-            issue.key.toLowerCase().includes(filters.search.toLowerCase());
-        const matchesPriority = filters.priority === "All" || issue.priority === filters.priority;
-        return matchesSearch && matchesPriority;
-    }), [filters.priority, filters.search, issues]);
-    return (h("section", { className: "jira-board" },
-        h("header", null,
-            h("p", { className: "origin" }, "Jira Clone board pattern"),
-            h("h2", null, "Kanban board")),
-        h("div", { className: "filters" },
-            h("input", { "aria-label": "Search issues", value: filters.search, placeholder: "Search issues", onInput: (event) => dispatch({ type: "search", value: event.currentTarget.value }) }),
-            h("select", { value: filters.priority, onChange: (event) => dispatch({
-                    type: "priority",
-                    value: event.currentTarget.value
-                }) },
-                h("option", null, "All"),
-                h("option", null, "High"),
-                h("option", null, "Medium"),
-                h("option", null, "Low"))),
-        h("div", { className: "issue-list" }, visibleIssues.map((issue) => (h("button", { className: "issue", onClick: () => props.onIssueOpen?.(issue) },
-            h("span", null, issue.key),
-            h("strong", null, issue.title),
-            h("small", null,
-                issue.status,
-                " / ",
-                issue.priority,
-                " / ",
-                issue.assignee)))))));
+const variantClasses = {
+    default: "variant-default",
+    outline: "variant-outline",
+    secondary: "variant-secondary"
+};
+const sizeClasses = {
+    lg: "size-lg",
+    md: "size-md",
+    sm: "size-sm"
+};
+function ShadcnButton({ disabled = false, label = "Open compiled button", loading = false, size = "md", variant = "default", onAction }) {
+    const className = useMemo(() => [
+        "ui-button",
+        variantClasses[variant] ?? variantClasses.default,
+        sizeClasses[size] ?? sizeClasses.md
+    ].join(" "), [size, variant]);
+    return (h("button", { className: className, disabled: disabled || loading, type: "button", onClick: onAction },
+        loading ? h("span", { className: "spinner", "aria-hidden": "true" }) : null,
+        h("span", null, loading ? "Compiling..." : label)));
 }
 
 
-defineComponentTag("lab-jira-board", JiraBoard, {"shadow":{"mode":"open"},"props":{"issues":{"attribute":false}},"events":{"onIssueOpen":{"name":"issue-open"}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n"});
+defineComponentTag("lab-shadcn-button", ShadcnButton, {"shadow":{"mode":"open"},"props":{"disabled":{"type":"boolean","default":false},"label":{"type":"string","default":"Open compiled button"},"loading":{"type":"boolean","default":false},"size":{"type":"string","default":"md"},"variant":{"type":"string","default":"default"}},"events":{"onAction":{"name":"action"}},"styles":"\n  :host{display:block;color:#162033;font-family:Inter,Arial,sans-serif}\n  .banner{border-radius:8px;background:#0f8f68;color:white;padding:22px}\n  .container{display:grid;gap:6px}\n  .logo-font{text-transform:lowercase;font-size:42px;line-height:1;margin:0}\n  p{margin:0;color:inherit}\n  .origin{color:#0f8f68;font-size:12px;font-weight:800;text-transform:uppercase}\n  .bp-dashboard,.jira-board{display:grid;gap:14px}\n  h2{margin:0;font-size:24px;line-height:1.15}\n  ul{margin:0;padding-left:18px;color:#516071;line-height:1.7}\n  .filters{display:grid;grid-template-columns:1fr 180px;gap:12px}\n  input,select{width:100%;border:1px solid #cbd5df;border-radius:6px;padding:10px;font:inherit}\n  .issue-list{display:grid;gap:10px}\n  .issue{display:grid;gap:4px;width:100%;border:1px solid #d7dfe7;border-radius:8px;background:#f8fafc;padding:12px;text-align:left;cursor:pointer}\n  .issue:hover{border-color:#0f8f68}\n  .issue span{color:#0f8f68;font-size:12px;font-weight:800}\n  .issue strong{font-size:16px}\n  .issue small{color:#607080}\n  .ui-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:6px;font-weight:750;font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,color .15s ease}\n  .ui-button:disabled{cursor:not-allowed;opacity:.65}\n  .variant-default{background:#111827;color:#fff}\n  .variant-default:hover:not(:disabled){background:#263244}\n  .variant-secondary{background:#eef3f7;color:#162033}\n  .variant-secondary:hover:not(:disabled){background:#dfe7ee}\n  .variant-outline{background:#fff;border-color:#c7d1dc;color:#162033}\n  .variant-outline:hover:not(:disabled){border-color:#0f8f68;color:#0f8f68}\n  .size-sm{min-height:34px;padding:7px 12px;font-size:13px}\n  .size-md{min-height:42px;padding:10px 16px;font-size:15px}\n  .size-lg{min-height:50px;padding:13px 20px;font-size:16px}\n  .spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:999px;animation:spin .8s linear infinite}\n  @keyframes spin{to{transform:rotate(360deg)}}\n  @media(max-width:640px){.filters{grid-template-columns:1fr}.logo-font{font-size:34px}}\n"});

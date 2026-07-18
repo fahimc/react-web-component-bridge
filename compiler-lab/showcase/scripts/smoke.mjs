@@ -31,6 +31,18 @@ try {
   await page.waitForSelector("lab-realworld-banner");
   await page.waitForSelector("lab-bulletproof-dashboard");
   await page.waitForSelector("lab-jira-board");
+  await page.waitForSelector("lab-shadcn-button");
+  await page
+    .locator("lab-shadcn-button")
+    .first()
+    .evaluate((element) => {
+      const button = element.shadowRoot?.querySelector("button");
+      if (!button) throw new Error("shadcn button not rendered");
+      button.click();
+    });
+  await page.waitForFunction(() =>
+    document.querySelector(".button-log")?.textContent?.includes("Primary action")
+  );
   await page.locator("lab-jira-board").evaluate((element) => {
     const issue = element.shadowRoot?.querySelector("button.issue");
     if (!issue) throw new Error("Issue button not rendered");
@@ -46,7 +58,9 @@ try {
     bulletproofText:
       document.querySelector("lab-bulletproof-dashboard")?.shadowRoot?.textContent ?? "",
     jiraText: document.querySelector("lab-jira-board")?.shadowRoot?.textContent ?? "",
-    eventText: document.querySelector(".event-log")?.textContent ?? ""
+    shadcnText: document.querySelector("lab-shadcn-button")?.shadowRoot?.textContent ?? "",
+    eventText: document.querySelector(".event-log")?.textContent ?? "",
+    buttonText: document.querySelector(".button-log")?.textContent ?? ""
   }));
   console.log(JSON.stringify({ metrics, errors }, null, 2));
   if (metrics.scrollWidth !== metrics.clientWidth) throw new Error("Mobile horizontal overflow");
@@ -54,7 +68,10 @@ try {
   if (!metrics.bulletproofText.includes("Katherine Johnson"))
     throw new Error("Bulletproof dashboard missing");
   if (!metrics.jiraText.includes("Kanban board")) throw new Error("Jira board missing");
+  if (!metrics.shadcnText.includes("Primary action")) throw new Error("shadcn button missing");
   if (!metrics.eventText.includes("RWCB-101")) throw new Error("Jira event not dispatched");
+  if (!metrics.buttonText.includes("Primary action"))
+    throw new Error("shadcn button event not dispatched");
   if (errors.length > 0) throw new Error(errors.join("\n"));
   await browser.close();
 } finally {
