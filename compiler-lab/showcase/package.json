@@ -1,0 +1,19 @@
+{
+  "name": "compiler-lab-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compile": "node scripts/compile-fixtures.mjs",
+    "dev": "vite --host 127.0.0.1 --port 5188",
+    "build": "pnpm compile && tsc -p tsconfig.json --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4188",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "vite": "^7.0.5",
+    "typescript": "^6.0.3",
+    "playwright": "^1.55.0"
+  },
+  "devDependencies": {}
+}

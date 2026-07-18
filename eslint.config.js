@@ -8,6 +8,8 @@ export default [
     ignores: [
       "**/dist/**",
       "coverage/**",
+      "compiler-lab/github-projects/**",
+      "compiler-lab/showcase/src/compiled/**",
       "node_modules/**",
       "playwright-report/**",
       "test-results/**",
@@ -15,6 +17,19 @@ export default [
     ]
   },
   js.configs.recommended,
+  {
+    files: ["compiler-lab/showcase/scripts/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        document: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+        setTimeout: "readonly",
+        URL: "readonly"
+      }
+    }
+  },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
