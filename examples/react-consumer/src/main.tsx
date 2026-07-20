@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
-import "@fahimc/react-web-component-bridge-test-components/web-components";
-import { sampleCustomers } from "@fahimc/react-web-component-bridge-test-components";
+import "@codedia/react-web-component-bridge-test-components/web-components";
+import { sampleCustomers } from "@codedia/react-web-component-bridge-test-components";
 
 declare module "react" {
   namespace JSX {

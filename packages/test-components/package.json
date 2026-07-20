@@ -1,5 +1,5 @@
 {
-  "name": "@fahimc/react-web-component-bridge-test-components",
+  "name": "@codedia/react-web-component-bridge-test-components",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@fahimc/react-web-component-bridge": "workspace:*",
+    "@codedia/react-web-component-bridge": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

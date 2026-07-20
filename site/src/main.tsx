@@ -641,7 +641,7 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
           <h2>Compile React-shaped TSX into browser Custom Elements.</h2>
         </div>
         <pre className="install-command">
-          <code>pnpm add -D @fahimc/react-web-component-bridge-generator</code>
+          <code>pnpm add -D @codedia/react-web-component-bridge-generator</code>
         </pre>
       </section>
     </main>

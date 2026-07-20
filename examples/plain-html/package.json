@@ -8,7 +8,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@fahimc/react-web-component-bridge-test-components": "workspace:*",
+    "@codedia/react-web-component-bridge-test-components": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

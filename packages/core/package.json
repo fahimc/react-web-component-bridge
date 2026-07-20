@@ -1,5 +1,5 @@
 {
-  "name": "@fahimc/react-web-component-bridge",
+  "name": "@codedia/react-web-component-bridge",
   "version": "0.1.0",
   "description": "Expose React components as standards-based Web Components.",
   "license": "MIT",

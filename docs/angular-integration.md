@@ -3,7 +3,7 @@
 Angular consumes the generated Web Component bundle, not the React source. Import the bundle once, enable `CUSTOM_ELEMENTS_SCHEMA`, and place the custom-element tags in Angular templates.
 
 ```ts
-import "@fahimc/react-web-component-bridge-test-components/web-components";
+import "@codedia/react-web-component-bridge-test-components/web-components";
 ```
 
 ```html

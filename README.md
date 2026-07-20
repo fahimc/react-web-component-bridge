@@ -1,6 +1,6 @@
 # React Web Component Bridge
 
-`@fahimc/react-web-component-bridge` lets teams author components in React-shaped TSX and ship them as browser-native Web Components without React in the final consumer bundle.
+`@codedia/react-web-component-bridge` lets teams author components in React-shaped TSX and ship them as browser-native Web Components without React in the final consumer bundle.
 
 The compiler path is the intended Angular/plain HTML integration path:
 
@@ -14,8 +14,8 @@ The emitted production module contains no `react`, no `react-dom`, and no `creat
 ## Install
 
 ```bash
-pnpm add -D @fahimc/react-web-component-bridge-generator
-pnpm add @fahimc/react-web-component-bridge
+pnpm add -D @codedia/react-web-component-bridge-generator
+pnpm add @codedia/react-web-component-bridge
 ```
 
 React can remain in the authoring workspace for types and migration, but Angular consumers of the compiled output do not need to install React or ReactDOM.
@@ -94,7 +94,7 @@ import React, {
   defineComponentTag,
   useMemo,
   useState
-} from "@fahimc/react-web-component-bridge/react";
+} from "@codedia/react-web-component-bridge/react";
 
 defineComponentTag("acme-customer-picker", CustomerPicker, {
   props: {
@@ -146,7 +146,7 @@ react-web-component-bridge replace-react-imports --dir src/components
 
 ```diff
 - import React, { useState } from "react";
-+ import React, { useState } from "@fahimc/react-web-component-bridge/react";
++ import React, { useState } from "@codedia/react-web-component-bridge/react";
 ```
 
 The command intentionally leaves `react-dom`, `react-dom/client`, and `react/jsx-runtime` alone so compiler migration can review those call sites explicitly.

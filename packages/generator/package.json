@@ -1,7 +1,7 @@
 {
-  "name": "@fahimc/react-web-component-bridge-generator",
+  "name": "@codedia/react-web-component-bridge-generator",
   "version": "0.1.0",
-  "description": "Metadata generator for @fahimc/react-web-component-bridge definitions.",
+  "description": "Metadata generator for @codedia/react-web-component-bridge definitions.",
   "license": "MIT",
   "type": "module",
   "homepage": "https://react-web-component-bridge-site.netlify.app",
@@ -30,7 +30,7 @@
     }
   },
   "dependencies": {
-    "@fahimc/react-web-component-bridge": "workspace:*",
+    "@codedia/react-web-component-bridge": "workspace:*",
     "typescript": "^6.0.3"
   },
   "files": [

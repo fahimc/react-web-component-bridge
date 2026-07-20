@@ -9,7 +9,7 @@ import {
   generateArtifacts,
   rewriteReactImportsInFolder
 } from "./index";
-import type { ReactElementMetadata } from "@fahimc/react-web-component-bridge";
+import type { ReactElementMetadata } from "@codedia/react-web-component-bridge";
 import type { CompileReactRegistration } from "./index";
 
 type GenerateCliOptions = {

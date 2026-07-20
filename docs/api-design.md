@@ -37,7 +37,7 @@ For richer contracts, use a JSON definition:
 Inline registration is still available when authors own the source and want the tag definition colocated:
 
 ```tsx
-import React, { defineComponentTag, useState } from "@fahimc/react-web-component-bridge/react";
+import React, { defineComponentTag, useState } from "@codedia/react-web-component-bridge/react";
 ```
 
 Both paths compile to browser-native Custom Elements with no React runtime in the emitted bundle.

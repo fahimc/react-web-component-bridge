@@ -1,6 +1,6 @@
 import { createApp, onMounted, ref } from "vue";
-import "@fahimc/react-web-component-bridge-test-components/web-components";
-import { sampleCustomers } from "@fahimc/react-web-component-bridge-test-components";
+import "@codedia/react-web-component-bridge-test-components/web-components";
+import { sampleCustomers } from "@codedia/react-web-component-bridge-test-components";
 
 createApp({
   setup() {

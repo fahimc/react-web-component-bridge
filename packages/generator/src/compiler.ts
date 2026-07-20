@@ -45,7 +45,7 @@ const reactModuleSpecifiers = new Set([
   "react",
   "react-dom",
   "react-dom/client",
-  "@fahimc/react-web-component-bridge/react"
+  "@codedia/react-web-component-bridge/react"
 ]);
 
 export async function compileReactFile(options: CompileReactFileOptions): Promise<void> {

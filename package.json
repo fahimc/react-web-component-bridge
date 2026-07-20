@@ -20,7 +20,7 @@
     "test:browser": "playwright test",
     "test:types": "tsc -p tests/types/tsconfig.json --noEmit",
     "bench": "tsx tests/performance/benchmark.ts",
-    "build": "pnpm --filter @fahimc/react-web-component-bridge build && pnpm --filter @fahimc/react-web-component-bridge-generator build && pnpm --filter @fahimc/react-web-component-bridge-test-components build",
+    "build": "pnpm --filter @codedia/react-web-component-bridge build && pnpm --filter @codedia/react-web-component-bridge-generator build && pnpm --filter @codedia/react-web-component-bridge-test-components build",
     "build:examples": "pnpm --filter plain-html-consumer build && pnpm --filter react-consumer build && pnpm --filter vue-consumer build && pnpm --filter complex-components-example build && pnpm --filter angular-consumer build",
     "build:site": "pnpm --filter rwcb-site build",
     "build:compiler-lab": "pnpm --filter compiler-lab-showcase build",

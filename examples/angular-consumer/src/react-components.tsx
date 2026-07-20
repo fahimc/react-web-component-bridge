@@ -2,7 +2,7 @@ import React, {
   defineComponentTag,
   useMemo,
   useState
-} from "@fahimc/react-web-component-bridge/react";
+} from "@codedia/react-web-component-bridge/react";
 
 type Customer = {
   id: string;

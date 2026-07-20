@@ -1,5 +1,5 @@
 import React from "react";
-import { defineComponentTag } from "@fahimc/react-web-component-bridge/react";
+import { defineComponentTag } from "@codedia/react-web-component-bridge/react";
 
 type PreviewAction = {
   label: string;

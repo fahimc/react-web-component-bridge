@@ -1,12 +1,12 @@
-# @fahimc/react-web-component-bridge-generator
+# @codedia/react-web-component-bridge-generator
 
 Compiler and metadata tooling for React Web Component Bridge.
 
 Use it to compile React-shaped TSX into browser-native Custom Element modules with no `react`, `react-dom`, JSX runtime import, or `createRoot` in the emitted consumer bundle.
 
 ```bash
-pnpm add -D @fahimc/react-web-component-bridge-generator
-pnpm add @fahimc/react-web-component-bridge
+pnpm add -D @codedia/react-web-component-bridge-generator
+pnpm add @codedia/react-web-component-bridge
 ```
 
 Compile one component:
