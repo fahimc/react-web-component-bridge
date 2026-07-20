@@ -1,4 +1,4 @@
-# React Web Component Bridge
+# React To Web Component Compiler
 
 `@codedia/react-to-web-component-runtime` lets teams author components in React-shaped TSX and ship them as browser-native Web Components without React in the final consumer bundle.
 
@@ -10,6 +10,22 @@ The compiler path is the intended Angular/plain HTML integration path:
 4. Import the emitted custom-element JavaScript from Angular, HTML, Vue, or a CMS.
 
 The emitted production module contains no `react`, no `react-dom`, and no `createRoot`.
+
+## Documentation Map
+
+- Website: https://react-to-web-component-compiler.netlify.app
+- Markdown site docs: [docs/site/index.md](./docs/site/index.md)
+- Overview: [docs/site/overview.md](./docs/site/overview.md)
+- Editor preview workflow: [docs/site/editor-preview.md](./docs/site/editor-preview.md)
+- Supported React API: [docs/site/supported-react-api.md](./docs/site/supported-react-api.md)
+- Architecture and translation workflow: [docs/site/architecture-workflow.md](./docs/site/architecture-workflow.md)
+- Angular and HTML consumption: [docs/site/angular-html-consumption.md](./docs/site/angular-html-consumption.md)
+
+Regenerate the Markdown site docs after website copy changes:
+
+```bash
+pnpm docs:site:md
+```
 
 ## Install
 

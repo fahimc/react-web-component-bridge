@@ -1,6 +1,6 @@
 # Architecture
 
-React Web Component Bridge is now compiler-first. React-shaped TSX is the authoring format, but the production Web Component bundle must not import `react`, `react-dom`, or create a React root.
+React To Web Component Compiler is compiler-first. React-shaped TSX is the authoring format, but the production Web Component bundle must not import `react`, `react-dom`, or create a React root.
 
 The legacy runtime facade can still exist for tests and migration, but the intended Angular/plain HTML distribution path is:
 

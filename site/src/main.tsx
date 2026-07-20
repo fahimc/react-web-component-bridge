@@ -311,7 +311,7 @@ function App() {
     <main>
       <nav className="topbar" aria-label="Primary">
         <a className="brand" href="#top">
-          React Web Component Bridge
+          React To Web Component Compiler
         </a>
         <div className="navlinks">
           <a href="#editor">Editor</a>

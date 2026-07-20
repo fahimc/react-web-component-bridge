@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4 - 2026-07-20
+
+### Changed
+
+- Expanded npm package READMEs with deeper compiler/runtime architecture, workflows, supported API details, compatibility notes, and consumer guidance.
+- Added a repeatable site-to-Markdown export script and generated Markdown documentation pages under `docs/site/`.
+- Linked the generated Markdown pages from the root and package READMEs for additional context.
+- Removed local ignored publish/build artifacts from the workspace cleanup pass.
+
 ## 0.1.3 - 2026-07-20
 
 ### Changed
