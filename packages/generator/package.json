@@ -1,17 +1,17 @@
 {
   "name": "@codedia/react-to-web-component-compiler",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Metadata generator for @codedia/react-to-web-component-runtime definitions.",
   "license": "MIT",
   "type": "module",
   "homepage": "https://react-web-component-bridge-site.netlify.app",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fahimc/react-web-component-bridge.git",
+    "url": "git+https://github.com/fahimc/react-to-web-component-compiler.git",
     "directory": "packages/generator"
   },
   "bugs": {
-    "url": "https://github.com/fahimc/react-web-component-bridge/issues"
+    "url": "https://github.com/fahimc/react-to-web-component-compiler/issues"
   },
   "publishConfig": {
     "access": "public"

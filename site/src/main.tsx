@@ -319,7 +319,7 @@ function App() {
           <a href="#support">Support</a>
           <a href="#architecture">Architecture</a>
           <a
-            href="https://github.com/fahimc/react-web-component-bridge"
+            href="https://github.com/fahimc/react-to-web-component-compiler"
             target="_blank"
             rel="noreferrer"
           >

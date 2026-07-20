@@ -27,4 +27,4 @@ react-to-web-component-compiler compile-folder --dir src/components --out-dir di
 
 Documentation: https://react-web-component-bridge-site.netlify.app
 
-Repository: https://github.com/fahimc/react-web-component-bridge
+Repository: https://github.com/fahimc/react-to-web-component-compiler

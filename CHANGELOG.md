@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - 2026-07-20
+
+### Changed
+
+- Updated package metadata, package READMEs, and the website GitHub link to the renamed repository URL: `https://github.com/fahimc/react-to-web-component-compiler`.
+
 ## 0.1.1 - 2026-07-20
 
 ### Changed

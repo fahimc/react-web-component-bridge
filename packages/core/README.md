@@ -13,4 +13,4 @@ The package also exports a React-compatible authoring facade at `@codedia/react-
 
 Documentation: https://react-web-component-bridge-site.netlify.app
 
-Repository: https://github.com/fahimc/react-web-component-bridge
+Repository: https://github.com/fahimc/react-to-web-component-compiler
