@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 - 2026-07-20
+
+### Changed
+
+- Updated package homepage metadata and package README documentation links to `https://react-to-web-component-compiler.netlify.app`.
+
 ## 0.1.2 - 2026-07-20
 
 ### Changed
