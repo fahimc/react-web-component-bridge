@@ -1,0 +1,16 @@
+{
+  "tagName": "demo-metric-card",
+  "component": "MetricCard",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "label": { "type": "string", "reflect": true },
+      "value": { "type": "number", "reflect": true },
+      "delta": { "type": "number", "reflect": true }
+    },
+    "events": {
+      "onInspect": { "name": "inspect" }
+    },
+    "styles": ":host{display:block}.metric-card{border:1px solid #d9e2ec;padding:1rem;border-radius:.5rem}.metric-card--positive{border-color:#10b981}.metric-card--negative{border-color:#ef4444}"
+  }
+}

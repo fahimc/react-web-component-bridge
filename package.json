@@ -1,6 +1,6 @@
 {
   "name": "react-to-web-component-compiler-monorepo",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "description": "Production-oriented TypeScript monorepo for exposing React components as browser-native Web Components.",
   "license": "MIT",
@@ -26,6 +26,7 @@
     "build:compiler-lab": "pnpm --filter compiler-lab-showcase build",
     "dev:compiler-lab": "pnpm --filter compiler-lab-showcase dev",
     "test:compiler-lab": "pnpm --filter compiler-lab-showcase build && pnpm --filter compiler-lab-showcase smoke",
+    "examples:conversions": "pnpm build && node examples/conversions/generate.mjs",
     "dev:site": "pnpm --filter rwcb-site dev",
     "docs:site:md": "node scripts/export-site-docs.mjs",
     "size": "size-limit",

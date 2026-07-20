@@ -20,11 +20,18 @@ The emitted production module contains no `react`, no `react-dom`, and no `creat
 - Supported React API: [docs/site/supported-react-api.md](./docs/site/supported-react-api.md)
 - Architecture and translation workflow: [docs/site/architecture-workflow.md](./docs/site/architecture-workflow.md)
 - Angular and HTML consumption: [docs/site/angular-html-consumption.md](./docs/site/angular-html-consumption.md)
+- Ten React-to-Web-Component conversion examples: [examples/conversions/README.md](./examples/conversions/README.md)
 
 Regenerate the Markdown site docs after website copy changes:
 
 ```bash
 pnpm docs:site:md
+```
+
+Regenerate the committed conversion examples after compiler changes:
+
+```bash
+pnpm examples:conversions
 ```
 
 ## Install

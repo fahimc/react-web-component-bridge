@@ -1,6 +1,6 @@
 {
   "name": "@codedia/react-to-web-component-test-components",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",

@@ -1,0 +1,14 @@
+{
+  "tagName": "demo-async-status",
+  "component": "AsyncStatus",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "label": { "type": "string", "reflect": true }
+    },
+    "events": {
+      "onRefresh": { "name": "refresh" }
+    },
+    "styles": ":host{display:block}.async-status{border:1px solid #d9e2ec;padding:1rem;border-radius:.5rem;display:grid;gap:.75rem}"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@codedia/react-to-web-component-compiler",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Compile React-shaped TSX into no-React browser-native Custom Element modules.",
   "license": "MIT",
   "type": "module",

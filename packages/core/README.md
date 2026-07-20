@@ -133,3 +133,4 @@ react-to-web-component-compiler compile \
 - Supported React API: https://github.com/fahimc/react-to-web-component-compiler/blob/main/docs/site/supported-react-api.md
 - Architecture workflow: https://github.com/fahimc/react-to-web-component-compiler/blob/main/docs/site/architecture-workflow.md
 - Angular and HTML consumption: https://github.com/fahimc/react-to-web-component-compiler/blob/main/docs/site/angular-html-consumption.md
+- Ten source-to-output conversion examples: https://github.com/fahimc/react-to-web-component-compiler/tree/main/examples/conversions

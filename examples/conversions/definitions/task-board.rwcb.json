@@ -1,0 +1,14 @@
+{
+  "tagName": "demo-task-board",
+  "component": "TaskBoard",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "tasks": { "attribute": false, "default": [] }
+    },
+    "events": {
+      "onTaskSelect": { "name": "task-select" }
+    },
+    "styles": ":host{display:block}.task-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}article{border:1px solid #d9e2ec;padding:.75rem;border-radius:.5rem}button{display:block;width:100%;margin:.5rem 0}"
+  }
+}

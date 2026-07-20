@@ -1,0 +1,14 @@
+{
+  "tagName": "demo-filter-toolbar",
+  "component": "FilterToolbar",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "filters": { "attribute": false, "default": ["Open", "Closed", "Mine"] }
+    },
+    "events": {
+      "onFilterChange": { "name": "filter-change" }
+    },
+    "styles": ":host{display:block}.filter-toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}button[aria-current=page]{background:#111827;color:white}"
+  }
+}

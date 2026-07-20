@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.5 - 2026-07-20
+
+### Added
+
+- Added ten side-by-side conversion examples under `examples/conversions`, each with React-shaped TSX source, Web Component definition metadata, and committed no-React converted JavaScript output.
+- Added `pnpm examples:conversions` to regenerate the committed conversion outputs from the compiler.
+
+### Changed
+
+- Linked the conversion gallery from the root README and npm package READMEs.
+
 ## 0.1.4 - 2026-07-20
 
 ### Changed

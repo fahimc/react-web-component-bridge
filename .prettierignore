@@ -3,3 +3,4 @@ packages/core/temp/
 pnpm-lock.yaml
 compiler-lab/github-projects/
 compiler-lab/showcase/src/compiled/
+examples/conversions/converted/

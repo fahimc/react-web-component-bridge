@@ -1,6 +1,6 @@
 {
   "name": "@codedia/react-to-web-component-runtime",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Runtime primitives for compiling React-shaped TSX into standards-based Web Components.",
   "license": "MIT",
   "type": "module",

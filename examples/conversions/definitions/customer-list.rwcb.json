@@ -1,0 +1,14 @@
+{
+  "tagName": "demo-customer-list",
+  "component": "CustomerList",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "customers": { "attribute": false, "default": [] }
+    },
+    "events": {
+      "onCustomerOpen": { "name": "customer-open" }
+    },
+    "styles": ":host{display:block}.customer-list{display:grid;gap:.75rem}ul{list-style:none;padding:0;margin:0;display:grid;gap:.5rem}button{width:100%;display:flex;justify-content:space-between}"
+  }
+}

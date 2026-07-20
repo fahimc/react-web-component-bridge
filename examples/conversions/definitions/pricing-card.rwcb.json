@@ -1,0 +1,16 @@
+{
+  "tagName": "demo-pricing-card",
+  "component": "PricingCard",
+  "options": {
+    "shadow": { "mode": "open" },
+    "props": {
+      "plan": { "type": "string", "reflect": true },
+      "price": { "type": "number", "reflect": true },
+      "featured": { "type": "boolean", "reflect": true }
+    },
+    "events": {
+      "onChoose": { "name": "choose" }
+    },
+    "styles": ":host{display:block}.pricing-card{border:1px solid #d9e2ec;padding:1rem;border-radius:.5rem}.pricing-card[data-featured=true]{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.2)}"
+  }
+}
