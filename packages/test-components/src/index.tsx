@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle,
   useRef,
   useState
-} from "@codedia/react-web-component-bridge/react";
+} from "@codedia/react-to-web-component-runtime/react";
 import { createPortal } from "react-dom";
 
 export type Customer = {

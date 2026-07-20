@@ -1,7 +1,7 @@
 {
-  "name": "@codedia/react-web-component-bridge-generator",
-  "version": "0.1.0",
-  "description": "Metadata generator for @codedia/react-web-component-bridge definitions.",
+  "name": "@codedia/react-to-web-component-compiler",
+  "version": "0.1.1",
+  "description": "Metadata generator for @codedia/react-to-web-component-runtime definitions.",
   "license": "MIT",
   "type": "module",
   "homepage": "https://react-web-component-bridge-site.netlify.app",
@@ -17,6 +17,7 @@
     "access": "public"
   },
   "bin": {
+    "react-to-web-component-compiler": "./dist/cli.cjs",
     "react-web-component-bridge": "./dist/cli.cjs"
   },
   "main": "./dist/index.cjs",
@@ -30,7 +31,7 @@
     }
   },
   "dependencies": {
-    "@codedia/react-web-component-bridge": "workspace:*",
+    "@codedia/react-to-web-component-runtime": "workspace:*",
     "typescript": "^6.0.3"
   },
   "files": [

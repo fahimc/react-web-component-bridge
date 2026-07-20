@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 - 2026-07-20
+
+### Changed
+
+- Renamed the published runtime package to `@codedia/react-to-web-component-runtime`.
+- Renamed the published compiler package and primary CLI to `@codedia/react-to-web-component-compiler` / `react-to-web-component-compiler`.
+- Kept `react-web-component-bridge` as a backwards-compatible CLI alias for existing scripts.
+- Updated documentation, examples, generated bundles, and runtime diagnostics to use the new naming.
+
 ## 0.1.0 - 2026-07-16
 
 ### Added
@@ -12,10 +21,10 @@
 - Added `replace-react-imports` / `migrate-react-imports` generator CLI commands and exported utilities for replacing exact `react` imports in a folder with the bridge React facade import.
 - Expanded architecture documentation with runtime, controller-stack, and React API translation diagrams.
 - Added a Netlify-ready documentation website in `site/` with a generated hero asset, live React-to-Web-Component preview editor, module documentation, supported API matrix, unsupported behavior notes, and architecture workflow page sections.
-- Added the React-compatible facade export `@codedia/react-web-component-bridge/react`, allowing component authors to keep React code intact while registering Web Component tags with `defineComponentTag`, `createComponentTag`, `defineWebComponent`, or `createWebComponent`.
-- Added a side-effect Web Component bundle for the example React components at `@codedia/react-web-component-bridge-test-components/web-components`.
+- Added the React-compatible facade export `@codedia/react-to-web-component-runtime/react`, allowing component authors to keep React code intact while registering Web Component tags with `defineComponentTag`, `createComponentTag`, `defineWebComponent`, or `createWebComponent`.
+- Added a side-effect Web Component bundle for the example React components at `@codedia/react-to-web-component-test-components/web-components`.
 - Rebuilt the Angular example so it imports the Web Component bundle and renders the React-authored components as custom-element tags.
-- Created the `@codedia/react-web-component-bridge` TypeScript package for wrapping React components as Custom Elements.
+- Created the `@codedia/react-to-web-component-runtime` TypeScript package for wrapping React components as Custom Elements.
 - Added `createReactElement`, `defineReactElement`, `defineReactElements`, registry helpers, global configuration, metadata generation, and public TypeScript types.
 - Implemented controller-based runtime layers for lifecycle, React rendering, props/attributes, event conversion, slots, styles, portals, public methods, and form-associated custom elements.
 - Added a generator package for explicit-definition metadata, `custom-elements.json`, declaration, and Markdown API outputs.

@@ -1,6 +1,6 @@
 # React Web Component Bridge
 
-`@codedia/react-web-component-bridge` lets teams author components in React-shaped TSX and ship them as browser-native Web Components without React in the final consumer bundle.
+`@codedia/react-to-web-component-runtime` lets teams author components in React-shaped TSX and ship them as browser-native Web Components without React in the final consumer bundle.
 
 The compiler path is the intended Angular/plain HTML integration path:
 
@@ -14,8 +14,8 @@ The emitted production module contains no `react`, no `react-dom`, and no `creat
 ## Install
 
 ```bash
-pnpm add -D @codedia/react-web-component-bridge-generator
-pnpm add @codedia/react-web-component-bridge
+pnpm add -D @codedia/react-to-web-component-compiler
+pnpm add @codedia/react-to-web-component-runtime
 ```
 
 React can remain in the authoring workspace for types and migration, but Angular consumers of the compiled output do not need to install React or ReactDOM.
@@ -54,7 +54,7 @@ function CustomerPicker(props: {
 Then supply the Web Component tag contract from the CLI or a JSON definition file:
 
 ```bash
-react-web-component-bridge compile \
+react-to-web-component-compiler compile \
   --input src/customer-picker.tsx \
   --out-file dist/customer-picker.custom-elements.js \
   --tag acme-customer-picker \
@@ -81,7 +81,7 @@ For richer props, events, slots, methods, and styles, use a definition file:
 ```
 
 ```bash
-react-web-component-bridge compile \
+react-to-web-component-compiler compile \
   --input src/customer-picker.tsx \
   --out-file dist/customer-picker.custom-elements.js \
   --definition customer-picker.rwcb.json
@@ -94,7 +94,7 @@ import React, {
   defineComponentTag,
   useMemo,
   useState
-} from "@codedia/react-web-component-bridge/react";
+} from "@codedia/react-to-web-component-runtime/react";
 
 defineComponentTag("acme-customer-picker", CustomerPicker, {
   props: {
@@ -114,7 +114,7 @@ defineComponentTag("acme-customer-picker", CustomerPicker, {
 ## Compile Without React
 
 ```bash
-react-web-component-bridge compile \
+react-to-web-component-compiler compile \
   --input src/customer-picker.tsx \
   --out-file dist/customer-picker.custom-elements.js \
   --tag acme-customer-picker \
@@ -124,7 +124,7 @@ react-web-component-bridge compile \
 For a folder:
 
 ```bash
-react-web-component-bridge compile-folder --dir src/components --out-dir dist/components
+react-to-web-component-compiler compile-folder --dir src/components --out-dir dist/components
 ```
 
 The compiler:
@@ -140,13 +140,13 @@ The compiler:
 Import replacement is optional for the compiler path. Use it only when you want source files to import bridge-only authoring helpers inline.
 
 ```bash
-react-web-component-bridge replace-react-imports --dir src/components --dry-run
-react-web-component-bridge replace-react-imports --dir src/components
+react-to-web-component-compiler replace-react-imports --dir src/components --dry-run
+react-to-web-component-compiler replace-react-imports --dir src/components
 ```
 
 ```diff
 - import React, { useState } from "react";
-+ import React, { useState } from "@codedia/react-web-component-bridge/react";
++ import React, { useState } from "@codedia/react-to-web-component-runtime/react";
 ```
 
 The command intentionally leaves `react-dom`, `react-dom/client`, and `react/jsx-runtime` alone so compiler migration can review those call sites explicitly.

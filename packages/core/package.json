@@ -1,6 +1,6 @@
 {
-  "name": "@codedia/react-web-component-bridge",
-  "version": "0.1.0",
+  "name": "@codedia/react-to-web-component-runtime",
+  "version": "0.1.1",
   "description": "Expose React components as standards-based Web Components.",
   "license": "MIT",
   "type": "module",

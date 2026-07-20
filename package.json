@@ -1,6 +1,6 @@
 {
-  "name": "react-web-component-bridge-monorepo",
-  "version": "0.1.0",
+  "name": "react-to-web-component-compiler-monorepo",
+  "version": "0.1.1",
   "private": true,
   "description": "Production-oriented TypeScript monorepo for exposing React components as browser-native Web Components.",
   "license": "MIT",
@@ -20,7 +20,7 @@
     "test:browser": "playwright test",
     "test:types": "tsc -p tests/types/tsconfig.json --noEmit",
     "bench": "tsx tests/performance/benchmark.ts",
-    "build": "pnpm --filter @codedia/react-web-component-bridge build && pnpm --filter @codedia/react-web-component-bridge-generator build && pnpm --filter @codedia/react-web-component-bridge-test-components build",
+    "build": "pnpm --filter @codedia/react-to-web-component-runtime build && pnpm --filter @codedia/react-to-web-component-compiler build && pnpm --filter @codedia/react-to-web-component-test-components build",
     "build:examples": "pnpm --filter plain-html-consumer build && pnpm --filter react-consumer build && pnpm --filter vue-consumer build && pnpm --filter complex-components-example build && pnpm --filter angular-consumer build",
     "build:site": "pnpm --filter rwcb-site build",
     "build:compiler-lab": "pnpm --filter compiler-lab-showcase build",

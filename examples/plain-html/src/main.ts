@@ -1,5 +1,5 @@
-import "@codedia/react-web-component-bridge-test-components/web-components";
-import { sampleCustomers } from "@codedia/react-web-component-bridge-test-components";
+import "@codedia/react-to-web-component-test-components/web-components";
+import { sampleCustomers } from "@codedia/react-to-web-component-test-components";
 
 const customers = sampleCustomers().slice(0, 25);
 const grid = document.querySelector("rwcb-customer-grid") as HTMLElement & {

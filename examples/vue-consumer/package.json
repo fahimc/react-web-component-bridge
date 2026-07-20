@@ -8,7 +8,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@codedia/react-web-component-bridge-test-components": "workspace:*",
+    "@codedia/react-to-web-component-test-components": "workspace:*",
     "@vitejs/plugin-vue": "^6.0.0",
     "vite": "^7.0.5",
     "typescript": "^6.0.3",

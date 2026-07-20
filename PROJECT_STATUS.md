@@ -46,7 +46,7 @@ Current measured baseline: 95.71% statements, 85.04% branches, 100% functions, 9
 
 - React and ReactDOM are peer dependencies.
 - The package wraps React at runtime and does not translate source code.
-- The recommended authoring import is `@codedia/react-web-component-bridge/react`, so users keep React component code intact while the bridge adapts the exported component to a Web Component tag.
+- The recommended authoring import is `@codedia/react-to-web-component-runtime/react`, so users keep React component code intact while the bridge adapts the exported component to a Web Component tag.
 - Metadata is generated from explicit definitions, not arbitrary source analysis.
 
 ## Next actions

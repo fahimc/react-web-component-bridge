@@ -1,6 +1,6 @@
 {
-  "name": "@codedia/react-web-component-bridge-test-components",
-  "version": "0.1.0",
+  "name": "@codedia/react-to-web-component-test-components",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@codedia/react-web-component-bridge": "workspace:*",
+    "@codedia/react-to-web-component-runtime": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

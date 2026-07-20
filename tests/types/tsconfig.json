@@ -6,7 +6,7 @@
     "types": ["react"],
     "baseUrl": "../..",
     "paths": {
-      "@codedia/react-web-component-bridge": ["packages/core/src/index.ts"]
+      "@codedia/react-to-web-component-runtime": ["packages/core/src/index.ts"]
     }
   },
   "include": ["./public-api.test-d.ts"]

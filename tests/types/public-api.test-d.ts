@@ -1,5 +1,5 @@
 import { expectTypeOf } from "expect-type";
-import type { ReactElementOptions } from "@codedia/react-web-component-bridge";
+import type { ReactElementOptions } from "@codedia/react-to-web-component-runtime";
 
 type Props = {
   selectedId?: string;

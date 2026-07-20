@@ -85,7 +85,7 @@ describe("no-React compiler", () => {
     const tagName = `x-compiled-counter-${Math.random().toString(16).slice(2)}`;
     const result = compileReactComponentSource({
       source: `
-        import React, { defineComponentTag, useMemo, useState } from "@codedia/react-web-component-bridge/react";
+        import React, { defineComponentTag, useMemo, useState } from "@codedia/react-to-web-component-runtime/react";
 
         function Counter(props: { label?: string; onIncrement?: (value: number) => void }) {
           const [count, setCount] = useState(1);
@@ -146,7 +146,7 @@ describe("no-React compiler", () => {
           useEffect,
           useImperativeHandle,
           useReducer
-        } from "@codedia/react-web-component-bridge/react";
+        } from "@codedia/react-to-web-component-runtime/react";
         import { createPortal } from "react-dom";
 
         const Theme = createContext("base");

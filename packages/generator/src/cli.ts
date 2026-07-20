@@ -9,7 +9,7 @@ import {
   generateArtifacts,
   rewriteReactImportsInFolder
 } from "./index";
-import type { ReactElementMetadata } from "@codedia/react-web-component-bridge";
+import type { ReactElementMetadata } from "@codedia/react-to-web-component-runtime";
 import type { CompileReactRegistration } from "./index";
 
 type GenerateCliOptions = {
@@ -149,13 +149,13 @@ function parseArgs(args: string[]): CliOptions {
   throw new Error(
     [
       "Usage:",
-      "  react-web-component-bridge generate --input metadata.json --out-dir dist",
-      "  react-web-component-bridge compile --input src/card.tsx --out-file dist/card.js",
-      "  react-web-component-bridge compile --input src/card.tsx --tag acme-card --component Card",
-      "  react-web-component-bridge compile --input src/card.tsx --definition card.rwcb.json",
-      "  react-web-component-bridge compile-folder --dir src/components --out-dir dist/components",
-      "  react-web-component-bridge replace-react-imports --dir src [--dry-run]",
-      "  react-web-component-bridge migrate-react-imports src [--dry-run]"
+      "  react-to-web-component-compiler generate --input metadata.json --out-dir dist",
+      "  react-to-web-component-compiler compile --input src/card.tsx --out-file dist/card.js",
+      "  react-to-web-component-compiler compile --input src/card.tsx --tag acme-card --component Card",
+      "  react-to-web-component-compiler compile --input src/card.tsx --definition card.rwcb.json",
+      "  react-to-web-component-compiler compile-folder --dir src/components --out-dir dist/components",
+      "  react-to-web-component-compiler replace-react-imports --dir src [--dry-run]",
+      "  react-to-web-component-compiler migrate-react-imports src [--dry-run]"
     ].join("\n")
   );
 }

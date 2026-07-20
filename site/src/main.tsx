@@ -201,7 +201,7 @@ function buildBridgeSource(tagName: string) {
   }
 }
 
-react-web-component-bridge compile \\
+react-to-web-component-compiler compile \\
   --input metric-card.tsx \\
   --out-file metric-card.web-components.js \\
   --definition metric-card.rwcb.json`;
@@ -513,9 +513,9 @@ export function CustomerCard({ customer, onSelect }) {
               <code>createRoot</code>.
             </p>
             <pre>
-              <code>{`react-web-component-bridge compile --input src/card.tsx --tag acme-card --component Card
-react-web-component-bridge compile --input src/card.tsx --definition card.rwcb.json
-react-web-component-bridge compile-folder --dir src/components --out-dir dist/components`}</code>
+              <code>{`react-to-web-component-compiler compile --input src/card.tsx --tag acme-card --component Card
+react-to-web-component-compiler compile --input src/card.tsx --definition card.rwcb.json
+react-to-web-component-compiler compile-folder --dir src/components --out-dir dist/components`}</code>
             </pre>
           </article>
           <article>
@@ -525,8 +525,8 @@ react-web-component-bridge compile-folder --dir src/components --out-dir dist/co
               helpers inline in source. Use <code>--dry-run</code> first to review changed files.
             </p>
             <pre>
-              <code>{`react-web-component-bridge replace-react-imports --dir src/components --dry-run
-react-web-component-bridge replace-react-imports --dir src/components`}</code>
+              <code>{`react-to-web-component-compiler replace-react-imports --dir src/components --dry-run
+react-to-web-component-compiler replace-react-imports --dir src/components`}</code>
             </pre>
           </article>
         </div>
@@ -641,7 +641,7 @@ react-web-component-bridge replace-react-imports --dir src/components`}</code>
           <h2>Compile React-shaped TSX into browser Custom Elements.</h2>
         </div>
         <pre className="install-command">
-          <code>pnpm add -D @codedia/react-web-component-bridge-generator</code>
+          <code>pnpm add -D @codedia/react-to-web-component-compiler</code>
         </pre>
       </section>
     </main>

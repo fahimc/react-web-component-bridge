@@ -1,6 +1,6 @@
 export function warnDevelopment(enabled: boolean, message: string): void {
   if (enabled && typeof console !== "undefined") {
-    console.warn(`[react-web-component-bridge] ${message}`);
+    console.warn(`[react-to-web-component-runtime] ${message}`);
   }
 }
 

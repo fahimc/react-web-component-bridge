@@ -75,17 +75,17 @@ Production bundle
 CLI commands:
 
 ```bash
-react-web-component-bridge compile --input src/customer-picker.tsx --out-file dist/customer-picker.js
-react-web-component-bridge compile --input src/customer-picker.tsx --tag acme-picker --component CustomerPicker
-react-web-component-bridge compile --input src/customer-picker.tsx --definition customer-picker.rwcb.json
-react-web-component-bridge compile-folder --dir src/components --out-dir dist/components
+react-to-web-component-compiler compile --input src/customer-picker.tsx --out-file dist/customer-picker.js
+react-to-web-component-compiler compile --input src/customer-picker.tsx --tag acme-picker --component CustomerPicker
+react-to-web-component-compiler compile --input src/customer-picker.tsx --definition customer-picker.rwcb.json
+react-to-web-component-compiler compile-folder --dir src/components --out-dir dist/components
 ```
 
 The existing import migration command is optional. It is only needed when component authors want to add bridge-only helpers directly to source:
 
 ```bash
-react-web-component-bridge replace-react-imports --dir src/components --dry-run
-react-web-component-bridge replace-react-imports --dir src/components
+react-to-web-component-compiler replace-react-imports --dir src/components --dry-run
+react-to-web-component-compiler replace-react-imports --dir src/components
 ```
 
 ## React API Translation

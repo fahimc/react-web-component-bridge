@@ -79,10 +79,10 @@ describe("PropertyController", () => {
 
     controller.setProperty("requiredValue", "");
     expect(warn).toHaveBeenCalledWith(
-      '[react-web-component-bridge] Invalid value for property "requiredValue".'
+      '[react-to-web-component-runtime] Invalid value for property "requiredValue".'
     );
     expect(warn).toHaveBeenCalledWith(
-      '[react-web-component-bridge] Required property "requiredValue" is missing.'
+      '[react-to-web-component-runtime] Required property "requiredValue" is missing.'
     );
     warn.mockRestore();
   });
